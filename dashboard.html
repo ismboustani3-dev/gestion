@@ -37,41 +37,26 @@ button{padding:10px 15px;border:none;border-radius:8px;background:#2563eb;color:
 /* SECTIONS */
 .section{display:none}
 .section.active{display:block}
-
-/* LOGIN */
-#login{position:absolute;top:0;left:0;width:100%;height:100vh;display:flex;justify-content:center;align-items:center;background:#0b1220}
-.login-box{background:#111827;padding:30px;border-radius:12px;text-align:center}
 </style>
 </head>
 
 <body>
-
-<!-- LOGIN -->
-<div id="login">
-  <div class="login-box">
-    <h2>Login</h2>
-    <input id="loginEmail" placeholder="Email"><br>
-    <input id="loginPassword" type="password" placeholder="Password"><br>
-    <button onclick="login()">Login</button>
-  </div>
-</div>
 
 <!-- SIDEBAR -->
 <div class="sidebar">
   <div class="logo">TeamDash</div>
 
   <div class="menu">
-    <div onclick="showPage('dashboard')">📊 Dashboard</div>
+    <div onclick="showPage('dashboard')" class="active">📊 Dashboard</div>
     <div onclick="showPage('users')">👥 Users</div>
     <div onclick="showPage('projects')">📁 Projects</div>
-    <div onclick="logout()">🚪 Logout</div>
   </div>
 </div>
 
 <div class="main">
 
 <!-- DASHBOARD -->
-<div id="dashboard" class="section">
+<div id="dashboard" class="section active">
   <h2>Dashboard</h2>
 
   <div class="cards">
@@ -101,9 +86,8 @@ button{padding:10px 15px;border:none;border-radius:8px;background:#2563eb;color:
   <h2>User Management</h2>
 
   <div class="box">
-    <input id="userInput" placeholder="Email">
-    <input id="passwordInput" placeholder="Password" type="password">
-    <button onclick="addUser()">Create</button>
+    <input id="userInput" placeholder="Username">
+    <button onclick="addUser()">Add</button>
 
     <div id="userList"></div>
   </div>
@@ -127,18 +111,15 @@ button{padding:10px 15px;border:none;border-radius:8px;background:#2563eb;color:
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-  getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot
+  getFirestore,
+  collection,
+  addDoc,
+  deleteDoc,
+  doc,
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-/* 🔴 PUT YOUR CONFIG HERE */
+/* 🔴 PUT YOUR CONFIG */
 const firebaseConfig = {
   apiKey: "XXXX",
   authDomain: "XXXX",
@@ -148,36 +129,10 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const auth = getAuth(app);
 
 let users = [];
 let projects = [];
 let chart;
-
-/* AUTH */
-window.login = async function(){
-  let email = loginEmail.value;
-  let pass = loginPassword.value;
-
-  try{
-    await signInWithEmailAndPassword(auth,email,pass);
-  }catch(e){
-    alert("Login failed");
-  }
-};
-
-window.logout = async function(){
-  await signOut(auth);
-};
-
-onAuthStateChanged(auth,user=>{
-  if(user){
-    document.getElementById("login").style.display="none";
-    showPage("dashboard");
-  }else{
-    document.getElementById("login").style.display="flex";
-  }
-});
 
 /* NAV */
 window.showPage = function(p){
@@ -187,12 +142,13 @@ window.showPage = function(p){
 
 /* USERS */
 window.addUser = async function(){
-  let email = userInput.value;
-  let pass = passwordInput.value;
+  if(userInput.value === "") return;
 
-  await createUserWithEmailAndPassword(auth,email,pass);
+  await addDoc(collection(db,"users"),{
+    name: userInput.value
+  });
 
-  await addDoc(collection(db,"users"),{email});
+  userInput.value="";
 };
 
 function loadUsers(){
@@ -202,9 +158,10 @@ function loadUsers(){
 
     snap.forEach(d=>{
       users.push(d.data());
+
       userList.innerHTML+=`
         <div class="item">
-          ${d.data().email}
+          ${d.data().name}
           <button onclick="deleteUser('${d.id}')">X</button>
         </div>
       `;
@@ -220,9 +177,12 @@ window.deleteUser = async function(id){
 
 /* PROJECTS */
 window.addProject = async function(){
+  if(projectInput.value === "") return;
+
   await addDoc(collection(db,"projects"),{
     name: projectInput.value
   });
+
   projectInput.value="";
 };
 
@@ -233,6 +193,7 @@ function loadProjects(){
 
     snap.forEach(d=>{
       projects.push(d.data());
+
       projectList.innerHTML+=`
         <div class="item">
           ${d.data().name}
@@ -249,7 +210,7 @@ window.deleteProject = async function(id){
   await deleteDoc(doc(db,"projects",id));
 };
 
-/* STATS */
+/* STATS + CHART */
 function updateStats(){
   userCount.innerText = users.length;
   projectCount.innerText = projects.length;
@@ -258,7 +219,6 @@ function updateStats(){
   chart.update();
 }
 
-/* CHART */
 chart = new Chart(document.getElementById("chart"),{
   type:'bar',
   data:{
