@@ -2,106 +2,60 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TeamDash UI</title>
+<title>TeamDash Pro</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Segoe UI, sans-serif;
-}
-
-body{
-  background:#0b1220;
-  color:white;
-  display:flex;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI;}
+body{background:#0b1220;color:white;display:flex}
 
 /* SIDEBAR */
 .sidebar{
-  width:240px;
-  height:100vh;
-  background:#0f172a;
-  padding:20px;
-  position:fixed;
+  width:240px;height:100vh;background:#0f172a;
+  padding:20px;position:fixed;
 }
-
-.logo{
-  font-size:22px;
-  font-weight:bold;
-  margin-bottom:30px;
-}
-
+.logo{font-size:22px;font-weight:bold;margin-bottom:30px}
 .menu div{
-  padding:12px;
-  margin:8px 0;
-  border-radius:10px;
-  cursor:pointer;
-  transition:0.2s;
-  color:#9ca3af;
+  padding:12px;margin:8px 0;border-radius:10px;
+  cursor:pointer;color:#9ca3af
 }
-
-.menu div:hover{
-  background:#1f2937;
-  color:white;
-}
-
-.menu .active{
-  background:#2563eb;
-  color:white;
-}
+.menu div:hover{background:#1f2937;color:white}
+.menu .active{background:#2563eb;color:white}
 
 /* MAIN */
-.main{
-  margin-left:240px;
-  padding:20px;
-  width:100%;
-}
+.main{margin-left:240px;padding:20px;width:100%}
 
 /* CARDS */
 .cards{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:15px;
-  margin-bottom:20px;
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:15px;margin-bottom:20px;
 }
-
-.card{
-  background:#111827;
-  padding:20px;
-  border-radius:12px;
-}
-
-.card h3{
-  color:#9ca3af;
-  font-size:14px;
-}
-
-.card h1{
-  margin-top:10px;
-}
+.card{background:#111827;padding:20px;border-radius:12px}
+.card h3{color:#9ca3af}
 
 /* BOX */
-.box{
-  background:#111827;
-  padding:20px;
-  border-radius:12px;
-  margin-top:20px;
+.box{background:#111827;padding:20px;border-radius:12px;margin-top:20px}
+
+/* INPUT */
+input{
+  padding:10px;border:none;border-radius:8px;margin-right:10px;
+}
+button{
+  padding:10px 15px;border:none;border-radius:8px;
+  background:#2563eb;color:white;cursor:pointer;
+}
+
+/* LIST */
+.item{
+  display:flex;justify-content:space-between;
+  padding:10px;border-bottom:1px solid #1f2937;
 }
 
 /* SECTIONS */
-.section{
-  display:none;
-}
-
-.section.active{
-  display:block;
-}
+.section{display:none}
+.section.active{display:block}
 </style>
-
 </head>
 
 <body>
@@ -112,121 +66,168 @@ body{
 
   <div class="menu">
     <div class="active" onclick="showPage('dashboard')">📊 Dashboard</div>
-    <div onclick="showPage('users')">👥 User Management</div>
+    <div onclick="showPage('users')">👥 Users</div>
     <div onclick="showPage('projects')">📁 Projects</div>
   </div>
 </div>
 
-<!-- MAIN -->
 <div class="main">
 
-  <!-- DASHBOARD -->
-  <div id="dashboard" class="section active">
+<!-- DASHBOARD -->
+<div id="dashboard" class="section active">
+  <h2>Dashboard</h2>
 
-    <h2>Dashboard</h2>
-
-    <div class="cards">
-      <div class="card">
-        <h3>Total Users</h3>
-        <h1>8</h1>
-      </div>
-
-      <div class="card">
-        <h3>Total Projects</h3>
-        <h1>3</h1>
-      </div>
-
-      <div class="card">
-        <h3>Active Servers</h3>
-        <h1>15</h1>
-      </div>
+  <div class="cards">
+    <div class="card">
+      <h3>Total Users</h3>
+      <h1 id="userCount">0</h1>
     </div>
 
-    <div class="box">
-      <h3 style="margin-bottom:15px;">Statistics</h3>
-      <canvas id="myChart"></canvas>
+    <div class="card">
+      <h3>Total Projects</h3>
+      <h1 id="projectCount">0</h1>
     </div>
 
-  </div>
-
-  <!-- USERS -->
-  <div id="users" class="section">
-    <h2>User Management</h2>
-
-    <div class="box">
-      <p>👤 user1 - admin</p>
-      <p>👤 user2 - editor</p>
-      <p>👤 user3 - viewer</p>
+    <div class="card">
+      <h3>System Status</h3>
+      <h1>Online</h1>
     </div>
   </div>
 
-  <!-- PROJECTS -->
-  <div id="projects" class="section">
-    <h2>Projects</h2>
-
-    <div class="box">
-      <p>📁 Project A - Active</p>
-      <p>📁 Project B - Pending</p>
-      <p>📁 Project C - Completed</p>
-    </div>
+  <div class="box">
+    <h3>Statistics</h3>
+    <canvas id="chart"></canvas>
   </div>
+</div>
+
+<!-- USERS -->
+<div id="users" class="section">
+  <h2>User Management</h2>
+
+  <div class="box">
+    <input id="userInput" placeholder="Enter username">
+    <button onclick="addUser()">Add</button>
+
+    <div id="userList"></div>
+  </div>
+</div>
+
+<!-- PROJECTS -->
+<div id="projects" class="section">
+  <h2>Projects</h2>
+
+  <div class="box">
+    <input id="projectInput" placeholder="Enter project name">
+    <button onclick="addProject()">Add</button>
+
+    <div id="projectList"></div>
+  </div>
+</div>
 
 </div>
 
 <script>
+let users = [];
+let projects = [];
+let chart;
+
+/* NAVIGATION */
 function showPage(page){
-
-  let sections = document.querySelectorAll(".section");
-  sections.forEach(sec => sec.classList.remove("active"));
-
+  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
   document.getElementById(page).classList.add("active");
-
-  // fix chart render when returning
-  if(page === "dashboard"){
-    setTimeout(loadChart, 100);
-  }
 }
 
-let chartLoaded = false;
+/* USERS */
+function addUser(){
+  let input = document.getElementById("userInput");
+  if(input.value === "") return;
 
-function loadChart(){
-  if(chartLoaded) return;
+  users.push(input.value);
+  input.value="";
+  renderUsers();
+}
 
-  const ctx = document.getElementById('myChart');
+function renderUsers(){
+  let list = document.getElementById("userList");
+  list.innerHTML="";
 
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: ['Users', 'Projects'],
-      datasets: [{
-        label: 'System Stats',
-        data: [8, 3],
-        borderWidth: 1,
-        backgroundColor: ['#3b82f6','#a855f7']
-      }]
-    },
-    options: {
-      plugins: {
-        legend: {
-          labels: { color: 'white' }
-        }
-      },
-      scales: {
-        x: {
-          ticks: { color: 'white' }
-        },
-        y: {
-          ticks: { color: 'white' }
-        }
-      }
-    }
+  users.forEach((u,i)=>{
+    list.innerHTML += `
+      <div class="item">
+        ${u}
+        <button onclick="deleteUser(${i})">X</button>
+      </div>
+    `;
   });
 
-  chartLoaded = true;
+  updateStats();
 }
 
-// load chart first time
-loadChart();
+function deleteUser(i){
+  users.splice(i,1);
+  renderUsers();
+}
+
+/* PROJECTS */
+function addProject(){
+  let input = document.getElementById("projectInput");
+  if(input.value === "") return;
+
+  projects.push(input.value);
+  input.value="";
+  renderProjects();
+}
+
+function renderProjects(){
+  let list = document.getElementById("projectList");
+  list.innerHTML="";
+
+  projects.forEach((p,i)=>{
+    list.innerHTML += `
+      <div class="item">
+        ${p}
+        <button onclick="deleteProject(${i})">X</button>
+      </div>
+    `;
+  });
+
+  updateStats();
+}
+
+function deleteProject(i){
+  projects.splice(i,1);
+  renderProjects();
+}
+
+/* DASHBOARD UPDATE */
+function updateStats(){
+  document.getElementById("userCount").innerText = users.length;
+  document.getElementById("projectCount").innerText = projects.length;
+
+  updateChart();
+}
+
+/* CHART */
+function createChart(){
+  const ctx = document.getElementById("chart");
+
+  chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Users','Projects'],
+      datasets: [{
+        data: [0,0]
+      }]
+    }
+  });
+}
+
+function updateChart(){
+  chart.data.datasets[0].data = [users.length, projects.length];
+  chart.update();
+}
+
+createChart();
 </script>
 
 </body>
