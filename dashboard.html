@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Team System Pro</title>
+<title>Team System Fixed</title>
 
 <style>
 *{
@@ -52,12 +52,7 @@ body{
   color:white;
 }
 
-.menu .active{
-  background:#2563eb;
-  color:white;
-}
-
-/* LOGOUT BOTTOM */
+/* LOGOUT */
 .logout{
   padding:12px;
   margin-top:auto;
@@ -66,6 +61,7 @@ body{
   background:#1f2937;
   color:#ef4444;
   text-align:center;
+  user-select:none;
 }
 
 .logout:hover{
@@ -88,7 +84,6 @@ body{
   margin-top:15px;
 }
 
-/* INPUT */
 input{
   width:100%;
   padding:10px;
@@ -108,7 +103,6 @@ button{
   cursor:pointer;
 }
 
-/* CARD */
 .card{
   background:#0f172a;
   padding:12px;
@@ -135,50 +129,38 @@ button{
 <div class="logo">TEAM SYSTEM</div>
 
 <div class="menu">
-  <div class="active" onclick="UI.show('dashboard')">📊 Dashboard</div>
+  <div onclick="UI.show('dashboard')">📊 Dashboard</div>
   <div onclick="UI.show('users')">👥 Users</div>
   <div onclick="UI.show('projects')">📁 Projects</div>
 </div>
 
-<div class="logout" onclick="App.logout()">🚪 Logout</div>
+<div class="logout" id="logoutBtn">🚪 Logout</div>
 
 </div>
 
 <!-- MAIN -->
 <div class="main">
 
-<!-- DASHBOARD -->
 <div id="dashboard" class="section active">
   <h2>Dashboard</h2>
-
-  <div class="box">
-    <p>System ready ✔️</p>
-  </div>
 </div>
 
-<!-- USERS -->
 <div id="users" class="section">
-  <h2>User Management</h2>
-
+  <h2>Users</h2>
   <div class="box">
     <input id="uName" placeholder="username">
-    <button onclick="App.addUser()">Add User</button>
-
+    <button onclick="App.addUser()">Add</button>
     <div id="userList"></div>
   </div>
 </div>
 
-<!-- PROJECTS -->
 <div id="projects" class="section">
   <h2>Projects</h2>
-
   <div class="box">
     <input id="username" placeholder="username">
     <input id="object" placeholder="project name">
-    <input id="link" placeholder="project link">
-
-    <button onclick="App.addProject()">Add Project</button>
-
+    <input id="link" placeholder="link">
+    <button onclick="App.addProject()">Add</button>
     <div id="projectList"></div>
   </div>
 </div>
@@ -213,7 +195,8 @@ const DOM = {
   object: document.getElementById("object"),
   link: document.getElementById("link"),
   userList: document.getElementById("userList"),
-  projectList: document.getElementById("projectList")
+  projectList: document.getElementById("projectList"),
+  logoutBtn: document.getElementById("logoutBtn")
 };
 
 /* APP */
@@ -244,6 +227,7 @@ const App = {
   },
 
   logout: function(){
+    alert("Logged out");
     location.reload();
   }
 
@@ -260,43 +244,32 @@ const UI = {
   }
 };
 
-/* LOAD USERS */
-function loadUsers(){
-  onSnapshot(collection(db,"users"),snap=>{
-    DOM.userList.innerHTML="";
+/* LISTENERS */
+DOM.logoutBtn.addEventListener("click", App.logout);
 
-    snap.forEach(d=>{
-      DOM.userList.innerHTML += `
-        <div class="card">👤 ${d.data().name}</div>
-      `;
-    });
+/* LOAD USERS */
+onSnapshot(collection(db,"users"),snap=>{
+  DOM.userList.innerHTML="";
+  snap.forEach(d=>{
+    DOM.userList.innerHTML += `<div class="card">👤 ${d.data().name}</div>`;
   });
-}
+});
 
 /* LOAD PROJECTS */
-function loadProjects(){
-  onSnapshot(collection(db,"projects"),snap=>{
-    DOM.projectList.innerHTML="";
-
-    snap.forEach(d=>{
-      let p=d.data();
-
-      DOM.projectList.innerHTML += `
-        <div class="card">
-          👤 ${p.username}<br>
-          🧠 ${p.object}<br>
-          🔗 <a href="${p.link}" target="_blank" style="color:#38bdf8">Open</a>
-        </div>
-      `;
-    });
+onSnapshot(collection(db,"projects"),snap=>{
+  DOM.projectList.innerHTML="";
+  snap.forEach(d=>{
+    let p=d.data();
+    DOM.projectList.innerHTML += `
+      <div class="card">
+        👤 ${p.username}<br>
+        🧠 ${p.object}<br>
+        🔗 <a href="${p.link}" target="_blank" style="color:#38bdf8">Open</a>
+      </div>
+    `;
   });
-}
+});
 
-/* INIT */
-loadUsers();
-loadProjects();
-
-/* expose */
 window.App = App;
 window.UI = UI;
 
