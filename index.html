@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Panel</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#0b1220;
+  color:white;
+}
+
+/* LOGIN */
+.login{
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.box{
+  background:#1e293b;
+  padding:30px;
+  border-radius:10px;
+  width:300px;
+}
+
+input, button{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border:none;
+  border-radius:6px;
+}
+
+button{
+  background:#38bdf8;
+  cursor:pointer;
+}
+
+/* APP */
+#app{
+  display:none;
+}
+
+.navbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#111827;
+  padding:10px 20px;
+}
+
+.navbar a{
+  color:white;
+  margin:0 10px;
+  cursor:pointer;
+  text-decoration:none;
+}
+
+.container{
+  padding:20px;
+}
+
+.card{
+  background:#1e293b;
+  padding:15px;
+  margin-top:10px;
+  border-radius:10px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div class="login" id="loginPage">
+  <div class="box">
+    <h2>Admin Login</h2>
+    <input id="user" placeholder="Username">
+    <input id="pass" type="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <div class="navbar">
+    <div>
+      <a onclick="show('dashboard')">Dashboard</a>
+      <a onclick="show('users')">User Management</a>
+      <a onclick="show('projects')">Projects</a>
+    </div>
+
+    <div>
+      <a onclick="show('settings')">⚙ Settings</a>
+      <a onclick="logout()">Logout</a>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <div id="dashboard">
+      <h2>📊 Dashboard</h2>
+      <div class="card">Welcome Admin 👑</div>
+    </div>
+
+    <div id="users" style="display:none">
+      <h2>👤 User Management</h2>
+      <div class="card">User 1</div>
+      <div class="card">User 2</div>
+    </div>
+
+    <div id="projects" style="display:none">
+      <h2>📁 Projects</h2>
+      <div class="card">Project A</div>
+      <div class="card">Project B</div>
+    </div>
+
+    <div id="settings" style="display:none">
+      <h2>⚙ Settings</h2>
+
+      <div class="card">
+        <h3>Change Password</h3>
+        <input id="newPass" placeholder="New password">
+        <button onclick="changePass()">Update</button>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+// default admin
+if(!localStorage.getItem("adminPass")){
+  localStorage.setItem("adminPass","admin123");
+}
+
+// LOGIN
+function login(){
+  let u = document.getElementById("user").value;
+  let p = document.getElementById("pass").value;
+
+  if(u==="admin" && p===localStorage.getItem("adminPass")){
+    document.getElementById("loginPage").style.display="none";
+    document.getElementById("app").style.display="block";
+  } else {
+    alert("Wrong username or password");
+  }
+}
+
+// NAVIGATION
+function show(page){
+  let pages=["dashboard","users","projects","settings"];
+  pages.forEach(p=>{
+    document.getElementById(p).style.display="none";
+  });
+
+  document.getElementById(page).style.display="block";
+}
+
+// SETTINGS
+function changePass(){
+  let np = document.getElementById("newPass").value;
+  localStorage.setItem("adminPass",np);
+  alert("Password updated!");
+}
+
+// LOGOUT
+function logout(){
+  document.getElementById("app").style.display="none";
+  document.getElementById("loginPage").style.display="flex";
+}
+</script>
+
+</body>
+</html>
