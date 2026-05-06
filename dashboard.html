@@ -34,11 +34,17 @@ body{
 }
 
 .menu div{
-  padding:10px;
+  padding:12px;
   margin:8px 0;
-  border-radius:8px;
+  border-radius:10px;
   cursor:pointer;
-  color:#aaa;
+  transition:0.2s;
+  color:#9ca3af;
+}
+
+.menu div:hover{
+  background:#1f2937;
+  color:white;
 }
 
 .menu .active{
@@ -76,11 +82,12 @@ body{
   margin-top:10px;
 }
 
-/* SERVER LIST */
+/* BOX */
 .box{
   background:#111827;
   padding:20px;
   border-radius:12px;
+  margin-top:20px;
 }
 
 .server{
@@ -93,9 +100,19 @@ body{
 .rps{
   color:#a855f7;
 }
+
+/* SECTIONS */
+.section{
+  display:none;
+}
+
+.section.active{
+  display:block;
+}
 </style>
 
 </head>
+
 <body>
 
 <!-- SIDEBAR -->
@@ -103,58 +120,93 @@ body{
   <div class="logo">TeamDash</div>
 
   <div class="menu">
-    <div class="active">Overview</div>
-    <div>Management</div>
-    <div>Team</div>
-    <div>Tools</div>
+    <div class="active" onclick="showPage('dashboard')">📊 Dashboard</div>
+    <div onclick="showPage('users')">👥 User Management</div>
+    <div onclick="showPage('projects')">📁 Projects</div>
   </div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
 
-  <h2 style="margin-bottom:20px;">Overview</h2>
+  <!-- DASHBOARD -->
+  <div id="dashboard" class="section active">
 
-  <!-- CARDS -->
-  <div class="cards">
-    <div class="card">
-      <h3>Total Servers</h3>
-      <h1>15</h1>
+    <h2>Dashboard</h2>
+
+    <div class="cards">
+      <div class="card">
+        <h3>Total Servers</h3>
+        <h1>15</h1>
+      </div>
+
+      <div class="card">
+        <h3>Active RPS</h3>
+        <h1>29</h1>
+      </div>
+
+      <div class="card">
+        <h3>Stock RPS</h3>
+        <h1>0</h1>
+      </div>
     </div>
 
-    <div class="card">
-      <h3>Active RPS</h3>
-      <h1>29</h1>
+    <div class="box">
+      <h3>My Infrastructure</h3>
+
+      <div class="server">
+        <span>s_wmn3_2225 (104.206.148.58)</span>
+        <span class="rps">6 RPS</span>
+      </div>
+
+      <div class="server">
+        <span>s_wmn3_2193 (57.131.4.157)</span>
+        <span class="rps">3 RPS</span>
+      </div>
+
+      <div class="server">
+        <span>s_wmn3_2088 (46.105.41.176)</span>
+        <span class="rps">3 RPS</span>
+      </div>
+
     </div>
 
-    <div class="card">
-      <h3>Stock RPS</h3>
-      <h1>0</h1>
+  </div>
+
+  <!-- USERS -->
+  <div id="users" class="section">
+    <h2>User Management</h2>
+
+    <div class="box">
+      <p>👤 user1 - admin</p>
+      <p>👤 user2 - editor</p>
+      <p>👤 user3 - viewer</p>
     </div>
   </div>
 
-  <!-- SERVERS -->
-  <div class="box">
-    <h3 style="margin-bottom:15px;">My Infrastructure</h3>
+  <!-- PROJECTS -->
+  <div id="projects" class="section">
+    <h2>Projects</h2>
 
-    <div class="server">
-      <span>s_wmn3_2225 (104.206.148.58)</span>
-      <span class="rps">6 RPS</span>
+    <div class="box">
+      <p>📁 Project A - Active</p>
+      <p>📁 Project B - Pending</p>
+      <p>📁 Project C - Completed</p>
     </div>
-
-    <div class="server">
-      <span>s_wmn3_2193 (57.131.4.157)</span>
-      <span class="rps">3 RPS</span>
-    </div>
-
-    <div class="server">
-      <span>s_wmn3_2088 (46.105.41.176)</span>
-      <span class="rps">3 RPS</span>
-    </div>
-
   </div>
 
 </div>
+
+<script>
+function showPage(page){
+
+  let sections = document.querySelectorAll(".section");
+  sections.forEach(sec => sec.classList.remove("active"));
+
+  document.getElementById(page).classList.add("active");
+
+}
+</script>
 
 </body>
 </html>
