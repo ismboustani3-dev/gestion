@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <title>TeamDash UI</title>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
 *{
   margin:0;
@@ -59,7 +61,7 @@ body{
   width:100%;
 }
 
-/* TOP CARDS */
+/* CARDS */
 .cards{
   display:grid;
   grid-template-columns:repeat(3,1fr);
@@ -88,17 +90,6 @@ body{
   padding:20px;
   border-radius:12px;
   margin-top:20px;
-}
-
-.server{
-  display:flex;
-  justify-content:space-between;
-  padding:12px;
-  border-bottom:1px solid #1f2937;
-}
-
-.rps{
-  color:#a855f7;
 }
 
 /* SECTIONS */
@@ -136,39 +127,24 @@ body{
 
     <div class="cards">
       <div class="card">
-        <h3>Total Servers</h3>
+        <h3>Total Users</h3>
+        <h1>8</h1>
+      </div>
+
+      <div class="card">
+        <h3>Total Projects</h3>
+        <h1>3</h1>
+      </div>
+
+      <div class="card">
+        <h3>Active Servers</h3>
         <h1>15</h1>
-      </div>
-
-      <div class="card">
-        <h3>Active RPS</h3>
-        <h1>29</h1>
-      </div>
-
-      <div class="card">
-        <h3>Stock RPS</h3>
-        <h1>0</h1>
       </div>
     </div>
 
     <div class="box">
-      <h3>My Infrastructure</h3>
-
-      <div class="server">
-        <span>s_wmn3_2225 (104.206.148.58)</span>
-        <span class="rps">6 RPS</span>
-      </div>
-
-      <div class="server">
-        <span>s_wmn3_2193 (57.131.4.157)</span>
-        <span class="rps">3 RPS</span>
-      </div>
-
-      <div class="server">
-        <span>s_wmn3_2088 (46.105.41.176)</span>
-        <span class="rps">3 RPS</span>
-      </div>
-
+      <h3 style="margin-bottom:15px;">Statistics</h3>
+      <canvas id="myChart"></canvas>
     </div>
 
   </div>
@@ -205,7 +181,52 @@ function showPage(page){
 
   document.getElementById(page).classList.add("active");
 
+  // fix chart render when returning
+  if(page === "dashboard"){
+    setTimeout(loadChart, 100);
+  }
 }
+
+let chartLoaded = false;
+
+function loadChart(){
+  if(chartLoaded) return;
+
+  const ctx = document.getElementById('myChart');
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Users', 'Projects'],
+      datasets: [{
+        label: 'System Stats',
+        data: [8, 3],
+        borderWidth: 1,
+        backgroundColor: ['#3b82f6','#a855f7']
+      }]
+    },
+    options: {
+      plugins: {
+        legend: {
+          labels: { color: 'white' }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: 'white' }
+        },
+        y: {
+          ticks: { color: 'white' }
+        }
+      }
+    }
+  });
+
+  chartLoaded = true;
+}
+
+// load chart first time
+loadChart();
 </script>
 
 </body>
