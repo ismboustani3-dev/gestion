@@ -25,6 +25,18 @@ body{
   background:#0f172a;
   padding:20px;
   position:fixed;
+  display:flex;
+  flex-direction:column;
+}
+
+.logo{
+  font-size:20px;
+  font-weight:bold;
+  margin-bottom:20px;
+}
+
+.menu{
+  flex:1;
 }
 
 .menu div{
@@ -42,6 +54,22 @@ body{
 
 .menu .active{
   background:#2563eb;
+  color:white;
+}
+
+/* LOGOUT BOTTOM */
+.logout{
+  padding:12px;
+  margin-top:auto;
+  border-radius:10px;
+  cursor:pointer;
+  background:#1f2937;
+  color:#ef4444;
+  text-align:center;
+}
+
+.logout:hover{
+  background:#dc2626;
   color:white;
 }
 
@@ -87,6 +115,14 @@ button{
   margin-top:10px;
   border-radius:10px;
 }
+
+.section{
+  display:none;
+}
+
+.section.active{
+  display:block;
+}
 </style>
 
 </head>
@@ -95,21 +131,24 @@ button{
 
 <!-- SIDEBAR -->
 <div class="sidebar">
-  <h2>TEAM SYSTEM</h2>
 
-  <div class="menu">
-    <div onclick="UI.show('dashboard')">📊 Dashboard</div>
-    <div onclick="UI.show('users')">👥 Users</div>
-    <div onclick="UI.show('projects')">📁 Projects</div>
-    <div onclick="App.logout()">🚪 Logout</div>
-  </div>
+<div class="logo">TEAM SYSTEM</div>
+
+<div class="menu">
+  <div class="active" onclick="UI.show('dashboard')">📊 Dashboard</div>
+  <div onclick="UI.show('users')">👥 Users</div>
+  <div onclick="UI.show('projects')">📁 Projects</div>
+</div>
+
+<div class="logout" onclick="App.logout()">🚪 Logout</div>
+
 </div>
 
 <!-- MAIN -->
 <div class="main">
 
 <!-- DASHBOARD -->
-<div id="dashboard" class="section">
+<div id="dashboard" class="section active">
   <h2>Dashboard</h2>
 
   <div class="box">
@@ -153,9 +192,7 @@ import {
   getFirestore,
   collection,
   addDoc,
-  onSnapshot,
-  deleteDoc,
-  doc
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* CONFIG */
@@ -169,20 +206,19 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* DOM CACHE */
+/* DOM */
 const DOM = {
-  userList: document.getElementById("userList"),
-  projectList: document.getElementById("projectList"),
   uName: document.getElementById("uName"),
   username: document.getElementById("username"),
   object: document.getElementById("object"),
   link: document.getElementById("link"),
+  userList: document.getElementById("userList"),
+  projectList: document.getElementById("projectList")
 };
 
-/* APP LOGIC */
+/* APP */
 const App = {
 
-  /* USERS */
   addUser: async function(){
     if(!DOM.uName.value) return;
 
@@ -193,7 +229,6 @@ const App = {
     DOM.uName.value="";
   },
 
-  /* PROJECTS */
   addProject: async function(){
     if(!DOM.username.value || !DOM.object.value || !DOM.link.value) return;
 
@@ -208,20 +243,20 @@ const App = {
     DOM.link.value="";
   },
 
-  /* LOGOUT */
   logout: function(){
     location.reload();
   }
+
 };
 
-/* UI CONTROL */
+/* UI */
 const UI = {
   show: function(page){
 
     document.querySelectorAll(".section")
-      .forEach(s=>s.style.display="none");
+      .forEach(s=>s.classList.remove("active"));
 
-    document.getElementById(page).style.display="block";
+    document.getElementById(page).classList.add("active");
   }
 };
 
@@ -264,8 +299,6 @@ loadProjects();
 /* expose */
 window.App = App;
 window.UI = UI;
-
-UI.show("dashboard");
 
 </script>
 
