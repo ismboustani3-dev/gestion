@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TEAM SYSTEM PRO</title>
+<title>TEAM SYSTEM PRO MAX</title>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI}
@@ -35,7 +35,7 @@ input{
   border-radius:8px;background:#0f172a;color:white
 }
 button{
-  padding:10px 15px;background:#2563eb;border:none;
+  padding:8px 12px;background:#2563eb;border:none;
   border-radius:8px;color:white;cursor:pointer;margin-top:5px
 }
 .card{
@@ -45,18 +45,19 @@ button{
 .section{display:none}
 .section.active{display:block}
 .small-btn{
-  background:#ef4444;padding:5px 10px;margin-top:5px;
+  background:#ef4444;padding:4px 8px;margin-top:5px;
   border-radius:6px;font-size:12px
 }
+.edit-btn{background:#22c55e;margin-left:5px}
 .search{margin-top:10px}
+.user-title{margin-top:15px;font-size:18px}
 </style>
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
 <div class="sidebar">
-  <div class="logo">TEAM SYSTEM PRO</div>
+  <div class="logo">TEAM SYSTEM PRO MAX</div>
 
   <div class="menu">
     <div onclick="UI.show('dashboard')">📊 Dashboard</div>
@@ -67,16 +68,13 @@ button{
   <div class="logout" id="logoutBtn">🚪 Logout</div>
 </div>
 
-<!-- MAIN -->
 <div class="main">
 
-<!-- DASHBOARD -->
 <div id="dashboard" class="section active">
   <h2>Dashboard</h2>
   <div id="stats"></div>
 </div>
 
-<!-- USERS -->
 <div id="users" class="section">
   <h2>Users</h2>
   <div class="box">
@@ -86,7 +84,6 @@ button{
   </div>
 </div>
 
-<!-- PROJECTS -->
 <div id="projects" class="section">
   <h2>Projects</h2>
 
@@ -112,9 +109,10 @@ import {
   getFirestore,
   collection,
   addDoc,
-  onSnapshot,
+  getDocs,
   deleteDoc,
-  doc
+  doc,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import {
@@ -160,13 +158,27 @@ const App = {
     });
 
     DOM.uName.value="";
+    loadAll();
   },
 
   addProject: async function(){
     if(!DOM.username.value || !DOM.object.value || !DOM.link.value) return;
 
-    await addDoc(collection(db,"projects"),{
-      username: DOM.username.value,
+    const usersSnap = await getDocs(collection(db,"users"));
+    let userId=null;
+
+    usersSnap.forEach(u=>{
+      if(u.data().name === DOM.username.value){
+        userId = u.id;
+      }
+    });
+
+    if(!userId){
+      alert("User not found");
+      return;
+    }
+
+    await addDoc(collection(db,"users",userId,"projects"),{
       object: DOM.object.value,
       link: DOM.link.value,
       createdAt: Date.now()
@@ -175,16 +187,28 @@ const App = {
     DOM.username.value="";
     DOM.object.value="";
     DOM.link.value="";
+    loadAll();
   },
 
-  deleteProject: async function(id){
-    await deleteDoc(doc(db,"projects",id));
+  deleteProject: async function(uid,pid){
+    await deleteDoc(doc(db,"users",uid,"projects",pid));
+    loadAll();
+  },
+
+  editProject: async function(uid,pid){
+    let val = prompt("New name:");
+    if(!val) return;
+
+    await updateDoc(doc(db,"users",uid,"projects",pid),{
+      object: val
+    });
+
+    loadAll();
   },
 
   logout: function(){
     signOut(auth);
   }
-
 };
 
 /* UI */
@@ -197,52 +221,59 @@ const UI = {
   }
 };
 
-/* AUTH CHECK */
-onAuthStateChanged(auth, user=>{
+/* AUTH */
+onAuthStateChanged(auth,user=>{
   if(!user){
     let email = prompt("Email:");
     let pass = prompt("Password:");
 
     signInWithEmailAndPassword(auth,email,pass)
-      .catch(()=> alert("Login Failed"));
+      .catch(()=> alert("Login failed"));
   }
 });
 
-/* LIST USERS */
-onSnapshot(collection(db,"users"),snap=>{
-  DOM.userList.innerHTML="";
-  snap.forEach(d=>{
-    DOM.userList.innerHTML += `<div class="card">👤 ${d.data().name}</div>`;
-  });
-});
+/* LOAD EVERYTHING */
+async function loadAll(){
 
-/* LIST PROJECTS */
-onSnapshot(collection(db,"projects"),snap=>{
   DOM.projectList.innerHTML="";
+  DOM.userList.innerHTML="";
+  let total = 0;
 
-  let projects = [];
+  const usersSnap = await getDocs(collection(db,"users"));
 
-  snap.forEach(d=>{
-    projects.push({id:d.id,...d.data()});
-  });
+  for(const user of usersSnap.docs){
 
-  // SORT newest
-  projects.sort((a,b)=> b.createdAt - a.createdAt);
+    let u = user.data();
 
-  projects.forEach(p=>{
+    DOM.userList.innerHTML += `<div class="card">👤 ${u.name}</div>`;
+
     DOM.projectList.innerHTML += `
-    <div class="card">
-      👤 ${p.username}<br>
-      🧠 ${p.object}<br>
-      🔗 <a href="${p.link}" target="_blank" style="color:#38bdf8">Open</a><br>
-      <button class="small-btn" onclick="App.deleteProject('${p.id}')">Delete</button>
-    </div>
+      <div class="card">
+        <div class="user-title">👤 ${u.name}</div>
+        <div id="u-${user.id}"></div>
+      </div>
     `;
-  });
 
-  // stats
-  DOM.stats.innerHTML = `<p>Total Projects: ${projects.length}</p>`;
-});
+    const projSnap = await getDocs(collection(db,"users",user.id,"projects"));
+
+    projSnap.forEach(p=>{
+      total++;
+
+      let d = p.data();
+
+      document.getElementById(`u-${user.id}`).innerHTML += `
+        <div style="margin-top:8px;padding:8px;background:#111827;border-radius:8px">
+          🧠 ${d.object}<br>
+          🔗 <a href="${d.link}" target="_blank">Open</a><br>
+          <button onclick="App.deleteProject('${user.id}','${p.id}')">❌</button>
+          <button class="edit-btn" onclick="App.editProject('${user.id}','${p.id}')">✏️</button>
+        </div>
+      `;
+    });
+  }
+
+  DOM.stats.innerHTML = `<p>Total Projects: ${total}</p>`;
+}
 
 /* SEARCH */
 DOM.search.addEventListener("input", e=>{
@@ -255,6 +286,9 @@ DOM.search.addEventListener("input", e=>{
         ? "block" : "none";
     });
 });
+
+/* INIT */
+loadAll();
 
 window.App = App;
 window.UI = UI;
