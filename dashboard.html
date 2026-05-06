@@ -18,9 +18,8 @@ body{
   padding:20px;
 }
 
-/* CONTAINER */
 .container{
-  max-width:800px;
+  max-width:850px;
   margin:auto;
 }
 
@@ -31,6 +30,8 @@ input{
   margin:6px 0;
   border:none;
   border-radius:8px;
+  background:#111827;
+  color:white;
 }
 
 button{
@@ -40,19 +41,25 @@ button{
   border-radius:8px;
   color:white;
   cursor:pointer;
+  margin-top:10px;
 }
 
-/* PROJECT CARD */
+/* CARD */
 .card{
   background:#111827;
   padding:15px;
-  margin-top:10px;
+  margin-top:12px;
   border-radius:10px;
 }
 
 a{
   color:#38bdf8;
   text-decoration:none;
+}
+
+.small{
+  color:#9ca3af;
+  font-size:13px;
 }
 </style>
 
@@ -65,12 +72,12 @@ a{
 <h2>➕ Add Project</h2>
 
 <input id="username" placeholder="username">
-<input id="object" placeholder="project object">
-<input id="link" placeholder="project link">
+<input id="object" placeholder="project title / object">
+<input id="link" placeholder="project link (Vercel URL)">
 
-<button onclick="addProject()">Add</button>
+<button onclick="addProject()">Add Project</button>
 
-<h2 style="margin-top:30px;">📁 Projects List</h2>
+<h2 style="margin-top:30px;">📁 Projects</h2>
 
 <div id="list"></div>
 
@@ -83,12 +90,10 @@ import {
   getFirestore,
   collection,
   addDoc,
-  onSnapshot,
-  deleteDoc,
-  doc
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* 🔴 YOUR CONFIG */
+/* 🔴 CONFIG */
 const firebaseConfig = {
   apiKey: "XXXX",
   authDomain: "XXXX",
@@ -115,7 +120,7 @@ window.addProject = async function(){
   link.value="";
 };
 
-/* 📥 LOAD */
+/* 📥 LOAD PROJECTS */
 function loadProjects(){
 
   onSnapshot(collection(db,"projects"),snap=>{
@@ -127,11 +132,11 @@ function loadProjects(){
 
       list.innerHTML += `
         <div class="card">
-          👤 <b>${data.username}</b><br>
-          🧠 ${data.object}<br><br>
+          <div class="small">👤 ${data.username}</div>
+          <h3>${data.object}</h3><br>
 
           🔗 <a href="${data.link}" target="_blank">
-            Open Link
+            Open Project
           </a>
         </div>
       `;
