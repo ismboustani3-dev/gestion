@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Admin Dashboard Fixed</title>
+<title>Admin System Fixed</title>
 
 <style>
 body{
@@ -48,14 +48,14 @@ button{
 /* APP */
 #app{ display:none; }
 
-.nav{
+.navbar{
   display:flex;
   justify-content:space-between;
   background:#111827;
   padding:10px;
 }
 
-.nav a{
+.navbar a{
   color:white;
   margin:0 10px;
   cursor:pointer;
@@ -89,11 +89,11 @@ button{
 <!-- APP -->
 <div id="app">
 
-  <div class="nav">
+  <div class="navbar">
     <div>
       <a onclick="show('dashboard')">Dashboard</a>
       <a onclick="show('users')">Users</a>
-      <a onclick="show('projects')">Projects</a>
+      <a onclick="show('settings')">Settings</a>
     </div>
     <div>
       <a onclick="logout()">Logout</a>
@@ -102,20 +102,26 @@ button{
 
   <div class="container">
 
+    <!-- DASHBOARD -->
     <div id="dashboard">
       <h2>📊 Dashboard</h2>
       <div class="card">Users: <span id="userCount"></span></div>
-      <div class="card">Projects: <span id="projectCount"></span></div>
     </div>
 
+    <!-- USERS -->
     <div id="users" style="display:none">
-      <h2>Users</h2>
+      <h2>👤 Users</h2>
       <div class="card" id="userList"></div>
     </div>
 
-    <div id="projects" style="display:none">
-      <h2>Projects</h2>
-      <div class="card" id="projectList"></div>
+    <!-- SETTINGS -->
+    <div id="settings" style="display:none">
+      <h2>⚙ Change Password</h2>
+
+      <div class="card">
+        <input id="newPass" placeholder="New password">
+        <button onclick="changePassword()">Update</button>
+      </div>
     </div>
 
   </div>
@@ -123,22 +129,16 @@ button{
 
 <script>
 
-/* 🔥 INIT FIX (IMPORTANT FOR VERCEL) */
+/* 🔥 INIT SAFE (FIX VERCEL ISSUE) */
 function init(){
   let users = JSON.parse(localStorage.getItem("users"));
 
-  if(!users || users.length === 0){
+  if(!users){
     users = [
       {username:"admin", password:"admin123", role:"admin"},
       {username:"user1", password:"1234", role:"user"}
     ];
     localStorage.setItem("users", JSON.stringify(users));
-  }
-
-  let projects = JSON.parse(localStorage.getItem("projects"));
-  if(!projects || projects.length === 0){
-    projects = ["Project A","Project B"];
-    localStorage.setItem("projects", JSON.stringify(projects));
   }
 }
 
@@ -170,44 +170,55 @@ function login(){
 function show(page){
   document.getElementById("dashboard").style.display="none";
   document.getElementById("users").style.display="none";
-  document.getElementById("projects").style.display="none";
+  document.getElementById("settings").style.display="none";
 
   document.getElementById(page).style.display="block";
 
   if(page==="users") loadUsers();
-  if(page==="projects") loadProjects();
   if(page==="dashboard") updateStats();
 }
 
 /* STATS */
 function updateStats(){
   let users = JSON.parse(localStorage.getItem("users"));
-  let projects = JSON.parse(localStorage.getItem("projects"));
-
   document.getElementById("userCount").innerText = users.length;
-  document.getElementById("projectCount").innerText = projects.length;
 }
 
-/* USERS */
+/* USERS LIST */
 function loadUsers(){
   let users = JSON.parse(localStorage.getItem("users"));
 
   document.getElementById("userList").innerHTML =
-    users.map(u => `
+    users.map(u=>`
       <div class="card">
         👤 ${u.username} (${u.role})
       </div>
     `).join("");
 }
 
-/* PROJECTS */
-function loadProjects(){
-  let projects = JSON.parse(localStorage.getItem("projects"));
+/* 🔥 FIXED PASSWORD CHANGE (IMPORTANT) */
+function changePassword(){
+  let newPass = document.getElementById("newPass").value.trim();
 
-  document.getElementById("projectList").innerHTML =
-    projects.map(p => `
-      <div class="card">📁 ${p}</div>
-    `).join("");
+  if(!newPass) return alert("Enter password");
+
+  let currentUser = JSON.parse(localStorage.getItem("currentUser"));
+  let users = JSON.parse(localStorage.getItem("users"));
+
+  users = users.map(u=>{
+    if(u.username === currentUser.username){
+      return {...u, password:newPass};
+    }
+    return u;
+  });
+
+  localStorage.setItem("users", JSON.stringify(users));
+
+  // update current session too (IMPORTANT FIX)
+  currentUser.password = newPass;
+  localStorage.setItem("currentUser", JSON.stringify(currentUser));
+
+  alert("Password updated successfully!");
 }
 
 /* LOGOUT */
