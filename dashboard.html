@@ -1,300 +1,404 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TEAM SYSTEM PRO MAX</title>
+<title>Ultra Pro Admin Dashboard</title>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI}
-body{background:#0b1220;color:white;display:flex}
+body{
+  margin:0;
+  font-family:'Segoe UI', sans-serif;
+  background: radial-gradient(circle at top,#0a0f1c,#050814);
+  color:white;
+}
 
 /* SIDEBAR */
 .sidebar{
-  width:240px;height:100vh;background:#0f172a;
-  padding:20px;position:fixed;display:flex;flex-direction:column
+  position:fixed;
+  left:0;
+  top:0;
+  width:240px;
+  height:100vh;
+  background: rgba(17,24,39,0.65);
+  backdrop-filter: blur(15px);
+  padding:20px;
+  border-right:1px solid rgba(255,255,255,0.08);
 }
-.logo{font-size:20px;font-weight:bold;margin-bottom:20px}
-.menu{flex:1}
-.menu div{
-  padding:12px;margin:8px 0;border-radius:10px;
-  cursor:pointer;color:#9ca3af
+
+.sidebar h2{
+  color:#38bdf8;
 }
-.menu div:hover{background:#1f2937;color:white}
-.logout{
-  padding:12px;margin-top:auto;border-radius:10px;
-  cursor:pointer;background:#1f2937;color:#ef4444;text-align:center
+
+/* TOPBAR */
+.topbar{
+  position:fixed;
+  top:0;
+  left:240px;
+  right:0;
+  height:60px;
+  background: rgba(17,24,39,0.5);
+  backdrop-filter: blur(15px);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:0 20px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
 }
-.logout:hover{background:#dc2626;color:white}
+
+/* ADMIN MENU */
+#adminMenu{
+  display:none;
+  position:absolute;
+  right:0;
+  top:40px;
+  background:#111827;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.1);
+}
+
+#adminMenu button{
+  width:120px;
+  margin:5px 0;
+  padding:8px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  color:white;
+  background:linear-gradient(45deg,#38bdf8,#0ea5e9);
+}
+
+#adminMenu button:last-child{
+  background:#ef4444;
+}
+
+/* SEARCH */
+#search{
+  padding:8px;
+  border-radius:8px;
+  border:none;
+  background:#111827;
+  color:white;
+  width:200px;
+}
 
 /* MAIN */
-.main{margin-left:240px;padding:20px;width:100%}
-.box{background:#111827;padding:20px;border-radius:12px;margin-top:15px}
-input{
-  width:100%;padding:10px;margin:5px 0;border:none;
-  border-radius:8px;background:#0f172a;color:white
+.main{
+  margin-left:240px;
+  margin-top:60px;
+  padding:20px;
 }
-button{
-  padding:8px 12px;background:#2563eb;border:none;
-  border-radius:8px;color:white;cursor:pointer;margin-top:5px
+
+/* STATS */
+.stats{
+  display:flex;
+  gap:15px;
 }
+
+.stat{
+  flex:1;
+  background: rgba(17,24,39,0.6);
+  padding:18px;
+  border-radius:15px;
+  text-align:center;
+  border:1px solid rgba(56,189,248,0.2);
+  transition:0.3s;
+}
+
+.stat:hover{
+  transform:translateY(-5px);
+  border-color:#38bdf8;
+}
+
+/* GRID */
+#list{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(340px,1fr));
+  gap:15px;
+  margin-top:15px;
+}
+
+/* CARD */
 .card{
-  background:#0f172a;padding:12px;margin-top:10px;
-  border-radius:10px
+  background: rgba(17,24,39,0.6);
+  backdrop-filter: blur(10px);
+  padding:15px;
+  border-radius:15px;
+  border:1px solid rgba(255,255,255,0.08);
+  transition:0.3s;
 }
-.section{display:none}
-.section.active{display:block}
-.small-btn{
-  background:#ef4444;padding:4px 8px;margin-top:5px;
-  border-radius:6px;font-size:12px
+
+.card:hover{
+  transform:translateY(-6px);
+  border-color:#38bdf8;
 }
-.edit-btn{background:#22c55e;margin-left:5px}
-.search{margin-top:10px}
-.user-title{margin-top:15px;font-size:18px}
+
+/* TABLE */
+table{
+  width:100%;
+  margin-top:10px;
+  border-collapse:collapse;
+}
+
+th{
+  text-align:left;
+  padding:8px;
+  color:#38bdf8;
+}
+
+td{
+  padding:8px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+}
+
+/* INPUTS */
+input,button{
+  padding:10px;
+  margin:5px;
+  border:none;
+  border-radius:10px;
+}
+
+input{
+  background:#111827;
+  color:white;
+}
+
+button{
+  background:linear-gradient(45deg,#38bdf8,#0ea5e9);
+  color:white;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+button:hover{
+  transform:scale(1.05);
+}
+
+/* OPEN BUTTON */
+.openBtn{
+  padding:6px 12px;
+  border-radius:8px;
+  border:none;
+  background:#38bdf8;
+  color:white;
+  cursor:pointer;
+}
+
+/* ACTION */
+.delete{ color:#ef4444; cursor:pointer; }
+.edit{ color:#facc15; cursor:pointer; margin-left:10px; }
+
+/* ANIMATION */
+.card, .stat{
+  animation: fadeIn 0.4s ease-in;
+}
+
+@keyframes fadeIn{
+  from{opacity:0; transform:translateY(10px);}
+  to{opacity:1; transform:translateY(0);}
+}
 </style>
 </head>
 
 <body>
 
+<!-- SIDEBAR -->
 <div class="sidebar">
-  <div class="logo">TEAM SYSTEM PRO MAX</div>
-
-  <div class="menu">
-    <div onclick="UI.show('dashboard')">📊 Dashboard</div>
-    <div onclick="UI.show('users')">👥 Users</div>
-    <div onclick="UI.show('projects')">📁 Projects</div>
-  </div>
-
-  <div class="logout" id="logoutBtn">🚪 Logout</div>
+  <h2>⚡ Ultra Admin</h2>
 </div>
 
+<!-- TOPBAR -->
+<div class="topbar">
+
+  <input id="search" placeholder="🔍 Search user/project..." oninput="render()">
+
+  <div style="position:relative;">
+    👤 <span id="username"></span>
+
+    <button onclick="toggleMenu()" style="margin-left:10px;">
+      ⚙️ Admin
+    </button>
+
+    <!-- ADMIN MENU -->
+    <div id="adminMenu">
+      <button onclick="settings()">Settings</button>
+      <button onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- MAIN -->
 <div class="main">
 
-<div id="dashboard" class="section active">
-  <h2>Dashboard</h2>
-  <div id="stats"></div>
-</div>
-
-<div id="users" class="section">
-  <h2>Users</h2>
-  <div class="box">
-    <input id="uName" placeholder="username">
-    <button onclick="App.addUser()">Add</button>
-    <div id="userList"></div>
+  <div class="stats">
+    <div class="stat">👤 Users<br><span id="totalUsers">0</span></div>
+    <div class="stat">📁 Projects<br><span id="totalProjects">0</span></div>
   </div>
-</div>
 
-<div id="projects" class="section">
-  <h2>Projects</h2>
-
-  <div class="box">
-    <input id="username" placeholder="username">
-    <input id="object" placeholder="project name">
-    <input id="link" placeholder="link">
-    <button onclick="App.addProject()">Add</button>
-
-    <input id="search" class="search" placeholder="🔍 search...">
-
-    <div id="projectList"></div>
+  <div class="card">
+    <h3>➕ Add Project</h3>
+    <input id="user" placeholder="Username">
+    <input id="name" placeholder="Project name">
+    <input id="link" placeholder="Project link">
+    <button onclick="add()">Add</button>
   </div>
-</div>
+
+  <div id="list"></div>
 
 </div>
 
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  getDocs,
-  deleteDoc,
-  doc,
-  updateDoc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-/* CONFIG */
-const firebaseConfig = {
-  apiKey: "XXXX",
-  authDomain: "XXXX",
-  projectId: "XXXX",
-  appId: "XXXX"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth();
-
-/* DOM */
-const DOM = {
-  uName: document.getElementById("uName"),
-  username: document.getElementById("username"),
-  object: document.getElementById("object"),
-  link: document.getElementById("link"),
-  userList: document.getElementById("userList"),
-  projectList: document.getElementById("projectList"),
-  logoutBtn: document.getElementById("logoutBtn"),
-  stats: document.getElementById("stats"),
-  search: document.getElementById("search")
-};
-
-/* APP */
-const App = {
-
-  addUser: async function(){
-    if(!DOM.uName.value) return;
-
-    await addDoc(collection(db,"users"),{
-      name: DOM.uName.value
-    });
-
-    DOM.uName.value="";
-    loadAll();
-  },
-
-  addProject: async function(){
-    if(!DOM.username.value || !DOM.object.value || !DOM.link.value) return;
-
-    const usersSnap = await getDocs(collection(db,"users"));
-    let userId=null;
-
-    usersSnap.forEach(u=>{
-      if(u.data().name === DOM.username.value){
-        userId = u.id;
-      }
-    });
-
-    if(!userId){
-      alert("User not found");
-      return;
-    }
-
-    await addDoc(collection(db,"users",userId,"projects"),{
-      object: DOM.object.value,
-      link: DOM.link.value,
-      createdAt: Date.now()
-    });
-
-    DOM.username.value="";
-    DOM.object.value="";
-    DOM.link.value="";
-    loadAll();
-  },
-
-  deleteProject: async function(uid,pid){
-    await deleteDoc(doc(db,"users",uid,"projects",pid));
-    loadAll();
-  },
-
-  editProject: async function(uid,pid){
-    let val = prompt("New name:");
-    if(!val) return;
-
-    await updateDoc(doc(db,"users",uid,"projects",pid),{
-      object: val
-    });
-
-    loadAll();
-  },
-
-  logout: function(){
-    signOut(auth);
-  }
-};
-
-/* UI */
-const UI = {
-  show: function(page){
-    document.querySelectorAll(".section")
-      .forEach(s=>s.classList.remove("active"));
-
-    document.getElementById(page).classList.add("active");
-  }
-};
+<script>
 
 /* AUTH */
-onAuthStateChanged(auth,user=>{
-  if(!user){
-    let email = prompt("Email:");
-    let pass = prompt("Password:");
-
-    signInWithEmailAndPassword(auth,email,pass)
-      .catch(()=> alert("Login failed"));
-  }
-});
-
-/* LOAD EVERYTHING */
-async function loadAll(){
-
-  DOM.projectList.innerHTML="";
-  DOM.userList.innerHTML="";
-  let total = 0;
-
-  const usersSnap = await getDocs(collection(db,"users"));
-
-  for(const user of usersSnap.docs){
-
-    let u = user.data();
-
-    DOM.userList.innerHTML += `<div class="card">👤 ${u.name}</div>`;
-
-    DOM.projectList.innerHTML += `
-      <div class="card">
-        <div class="user-title">👤 ${u.name}</div>
-        <div id="u-${user.id}"></div>
-      </div>
-    `;
-
-    const projSnap = await getDocs(collection(db,"users",user.id,"projects"));
-
-    projSnap.forEach(p=>{
-      total++;
-
-      let d = p.data();
-
-      document.getElementById(`u-${user.id}`).innerHTML += `
-        <div style="margin-top:8px;padding:8px;background:#111827;border-radius:8px">
-          🧠 ${d.object}<br>
-          🔗 <a href="${d.link}" target="_blank">Open</a><br>
-          <button onclick="App.deleteProject('${user.id}','${p.id}')">❌</button>
-          <button class="edit-btn" onclick="App.editProject('${user.id}','${p.id}')">✏️</button>
-        </div>
-      `;
-    });
-  }
-
-  DOM.stats.innerHTML = `<p>Total Projects: ${total}</p>`;
+if(localStorage.getItem("auth") !== "true"){
+  location.href="index.html";
 }
 
-/* SEARCH */
-DOM.search.addEventListener("input", e=>{
-  let val = e.target.value.toLowerCase();
+document.getElementById("username").innerText =
+  localStorage.getItem("user");
 
-  document.querySelectorAll("#projectList .card")
-    .forEach(c=>{
-      c.style.display =
-        c.innerText.toLowerCase().includes(val)
-        ? "block" : "none";
-    });
-});
+/* DATA */
+function getData(){
+  return JSON.parse(localStorage.getItem("projects")) || [];
+}
 
-/* INIT */
-loadAll();
+function save(d){
+  localStorage.setItem("projects", JSON.stringify(d));
+}
 
-window.App = App;
-window.UI = UI;
+/* MENU */
+function toggleMenu(){
+  let m = document.getElementById("adminMenu");
+  m.style.display = (m.style.display==="block")?"none":"block";
+}
+
+/* SETTINGS (CHANGE PASSWORD) */
+function settings(){
+  let pass = prompt("Enter new admin password:");
+  if(pass){
+    localStorage.setItem("admin_pass", pass);
+    alert("Password updated!");
+  }
+  document.getElementById("adminMenu").style.display="none";
+}
+
+/* LOGOUT */
+function logout(){
+  localStorage.removeItem("auth");
+  localStorage.removeItem("user");
+  location.href="index.html";
+}
+
+/* ADD */
+function add(){
+  let d = getData();
+
+  let user = document.getElementById("user").value;
+  let name = document.getElementById("name").value;
+  let link = document.getElementById("link").value;
+
+  if(!user || !name || !link){
+    alert("Fill all");
+    return;
+  }
+
+  if(!link.startsWith("http")){
+    link = "https://" + link;
+  }
+
+  d.push({id:Date.now(), user, name, link});
+  save(d);
+  render();
+}
+
+/* DELETE */
+function delProject(id){
+  let d = getData().filter(x=>x.id!==id);
+  save(d);
+  render();
+}
+
+/* EDIT */
+function editProject(id){
+  let d = getData();
+  let p = d.find(x=>x.id===id);
+
+  let n = prompt("Edit name", p.name);
+  let l = prompt("Edit link", p.link);
+
+  if(n) p.name=n;
+  if(l){
+    if(!l.startsWith("http")) l="https://"+l;
+    p.link=l;
+  }
+
+  save(d);
+  render();
+}
+
+/* STATS */
+function updateStats(d){
+  let users = new Set(d.map(p=>p.user));
+  document.getElementById("totalUsers").innerText = users.size;
+  document.getElementById("totalProjects").innerText = d.length;
+}
+
+/* RENDER */
+function render(){
+  let d = getData();
+  let q = document.getElementById("search").value?.toLowerCase() || "";
+
+  let filtered = d.filter(p =>
+    p.user.toLowerCase().includes(q) ||
+    p.name.toLowerCase().includes(q)
+  );
+
+  updateStats(filtered);
+
+  let box = document.getElementById("list");
+  box.innerHTML = "";
+
+  let grouped = {};
+
+  filtered.forEach(p=>{
+    if(!grouped[p.user]) grouped[p.user]=[];
+    grouped[p.user].push(p);
+  });
+
+  for(let u in grouped){
+
+    let rows = grouped[u].map(p=>`
+      <tr>
+        <td>${p.name}</td>
+        <td><a href="${p.link}" target="_blank"><button class="openBtn">OPEN</button></a></td>
+        <td>
+          <span class="delete" onclick="delProject(${p.id})">del</span>
+          <span class="edit" onclick="editProject(${p.id})">edit</span>
+        </td>
+      </tr>
+    `).join("");
+
+    box.innerHTML += `
+      <div class="card">
+        <h3>👤 ${u}</h3>
+        <table>
+          <tr>
+            <th>Project</th>
+            <th>Link</th>
+            <th>Action</th>
+          </tr>
+          ${rows}
+        </table>
+      </div>
+    `;
+  }
+}
+
+render();
 
 </script>
 
 </body>
 </html>
-```
