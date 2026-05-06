@@ -1,150 +1,82 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Team System Fixed</title>
+<title>TEAM SYSTEM PRO</title>
 
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Segoe UI;
-}
-
-body{
-  background:#0b1220;
-  color:white;
-  display:flex;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI}
+body{background:#0b1220;color:white;display:flex}
 
 /* SIDEBAR */
 .sidebar{
-  width:240px;
-  height:100vh;
-  background:#0f172a;
-  padding:20px;
-  position:fixed;
-  display:flex;
-  flex-direction:column;
+  width:240px;height:100vh;background:#0f172a;
+  padding:20px;position:fixed;display:flex;flex-direction:column
 }
-
-.logo{
-  font-size:20px;
-  font-weight:bold;
-  margin-bottom:20px;
-}
-
-.menu{
-  flex:1;
-}
-
+.logo{font-size:20px;font-weight:bold;margin-bottom:20px}
+.menu{flex:1}
 .menu div{
-  padding:12px;
-  margin:8px 0;
-  border-radius:10px;
-  cursor:pointer;
-  color:#9ca3af;
+  padding:12px;margin:8px 0;border-radius:10px;
+  cursor:pointer;color:#9ca3af
 }
-
-.menu div:hover{
-  background:#1f2937;
-  color:white;
-}
-
-/* LOGOUT */
+.menu div:hover{background:#1f2937;color:white}
 .logout{
-  padding:12px;
-  margin-top:auto;
-  border-radius:10px;
-  cursor:pointer;
-  background:#1f2937;
-  color:#ef4444;
-  text-align:center;
-  user-select:none;
+  padding:12px;margin-top:auto;border-radius:10px;
+  cursor:pointer;background:#1f2937;color:#ef4444;text-align:center
 }
-
-.logout:hover{
-  background:#dc2626;
-  color:white;
-}
+.logout:hover{background:#dc2626;color:white}
 
 /* MAIN */
-.main{
-  margin-left:240px;
-  padding:20px;
-  width:100%;
-}
-
-/* BOX */
-.box{
-  background:#111827;
-  padding:20px;
-  border-radius:12px;
-  margin-top:15px;
-}
-
+.main{margin-left:240px;padding:20px;width:100%}
+.box{background:#111827;padding:20px;border-radius:12px;margin-top:15px}
 input{
-  width:100%;
-  padding:10px;
-  margin:5px 0;
-  border:none;
-  border-radius:8px;
-  background:#0f172a;
-  color:white;
+  width:100%;padding:10px;margin:5px 0;border:none;
+  border-radius:8px;background:#0f172a;color:white
 }
-
 button{
-  padding:10px 15px;
-  background:#2563eb;
-  border:none;
-  border-radius:8px;
-  color:white;
-  cursor:pointer;
+  padding:10px 15px;background:#2563eb;border:none;
+  border-radius:8px;color:white;cursor:pointer;margin-top:5px
 }
-
 .card{
-  background:#0f172a;
-  padding:12px;
-  margin-top:10px;
-  border-radius:10px;
+  background:#0f172a;padding:12px;margin-top:10px;
+  border-radius:10px
 }
-
-.section{
-  display:none;
+.section{display:none}
+.section.active{display:block}
+.small-btn{
+  background:#ef4444;padding:5px 10px;margin-top:5px;
+  border-radius:6px;font-size:12px
 }
-
-.section.active{
-  display:block;
-}
+.search{margin-top:10px}
 </style>
-
 </head>
 
 <body>
 
 <!-- SIDEBAR -->
 <div class="sidebar">
+  <div class="logo">TEAM SYSTEM PRO</div>
 
-<div class="logo">TEAM SYSTEM</div>
+  <div class="menu">
+    <div onclick="UI.show('dashboard')">📊 Dashboard</div>
+    <div onclick="UI.show('users')">👥 Users</div>
+    <div onclick="UI.show('projects')">📁 Projects</div>
+  </div>
 
-<div class="menu">
-  <div onclick="UI.show('dashboard')">📊 Dashboard</div>
-  <div onclick="UI.show('users')">👥 Users</div>
-  <div onclick="UI.show('projects')">📁 Projects</div>
-</div>
-
-<div class="logout" id="logoutBtn">🚪 Logout</div>
-
+  <div class="logout" id="logoutBtn">🚪 Logout</div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
 
+<!-- DASHBOARD -->
 <div id="dashboard" class="section active">
   <h2>Dashboard</h2>
+  <div id="stats"></div>
 </div>
 
+<!-- USERS -->
 <div id="users" class="section">
   <h2>Users</h2>
   <div class="box">
@@ -154,13 +86,18 @@ button{
   </div>
 </div>
 
+<!-- PROJECTS -->
 <div id="projects" class="section">
   <h2>Projects</h2>
+
   <div class="box">
     <input id="username" placeholder="username">
     <input id="object" placeholder="project name">
     <input id="link" placeholder="link">
     <button onclick="App.addProject()">Add</button>
+
+    <input id="search" class="search" placeholder="🔍 search...">
+
     <div id="projectList"></div>
   </div>
 </div>
@@ -170,12 +107,22 @@ button{
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
 import {
   getFirestore,
   collection,
   addDoc,
-  onSnapshot
+  onSnapshot,
+  deleteDoc,
+  doc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 /* CONFIG */
 const firebaseConfig = {
@@ -187,6 +134,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth();
 
 /* DOM */
 const DOM = {
@@ -196,7 +144,9 @@ const DOM = {
   link: document.getElementById("link"),
   userList: document.getElementById("userList"),
   projectList: document.getElementById("projectList"),
-  logoutBtn: document.getElementById("logoutBtn")
+  logoutBtn: document.getElementById("logoutBtn"),
+  stats: document.getElementById("stats"),
+  search: document.getElementById("search")
 };
 
 /* APP */
@@ -218,7 +168,8 @@ const App = {
     await addDoc(collection(db,"projects"),{
       username: DOM.username.value,
       object: DOM.object.value,
-      link: DOM.link.value
+      link: DOM.link.value,
+      createdAt: Date.now()
     });
 
     DOM.username.value="";
@@ -226,9 +177,12 @@ const App = {
     DOM.link.value="";
   },
 
+  deleteProject: async function(id){
+    await deleteDoc(doc(db,"projects",id));
+  },
+
   logout: function(){
-    alert("Logged out");
-    location.reload();
+    signOut(auth);
   }
 
 };
@@ -236,7 +190,6 @@ const App = {
 /* UI */
 const UI = {
   show: function(page){
-
     document.querySelectorAll(".section")
       .forEach(s=>s.classList.remove("active"));
 
@@ -244,10 +197,18 @@ const UI = {
   }
 };
 
-/* LISTENERS */
-DOM.logoutBtn.addEventListener("click", App.logout);
+/* AUTH CHECK */
+onAuthStateChanged(auth, user=>{
+  if(!user){
+    let email = prompt("Email:");
+    let pass = prompt("Password:");
 
-/* LOAD USERS */
+    signInWithEmailAndPassword(auth,email,pass)
+      .catch(()=> alert("Login Failed"));
+  }
+});
+
+/* LIST USERS */
 onSnapshot(collection(db,"users"),snap=>{
   DOM.userList.innerHTML="";
   snap.forEach(d=>{
@@ -255,19 +216,44 @@ onSnapshot(collection(db,"users"),snap=>{
   });
 });
 
-/* LOAD PROJECTS */
+/* LIST PROJECTS */
 onSnapshot(collection(db,"projects"),snap=>{
   DOM.projectList.innerHTML="";
+
+  let projects = [];
+
   snap.forEach(d=>{
-    let p=d.data();
+    projects.push({id:d.id,...d.data()});
+  });
+
+  // SORT newest
+  projects.sort((a,b)=> b.createdAt - a.createdAt);
+
+  projects.forEach(p=>{
     DOM.projectList.innerHTML += `
-      <div class="card">
-        👤 ${p.username}<br>
-        🧠 ${p.object}<br>
-        🔗 <a href="${p.link}" target="_blank" style="color:#38bdf8">Open</a>
-      </div>
+    <div class="card">
+      👤 ${p.username}<br>
+      🧠 ${p.object}<br>
+      🔗 <a href="${p.link}" target="_blank" style="color:#38bdf8">Open</a><br>
+      <button class="small-btn" onclick="App.deleteProject('${p.id}')">Delete</button>
+    </div>
     `;
   });
+
+  // stats
+  DOM.stats.innerHTML = `<p>Total Projects: ${projects.length}</p>`;
+});
+
+/* SEARCH */
+DOM.search.addEventListener("input", e=>{
+  let val = e.target.value.toLowerCase();
+
+  document.querySelectorAll("#projectList .card")
+    .forEach(c=>{
+      c.style.display =
+        c.innerText.toLowerCase().includes(val)
+        ? "block" : "none";
+    });
 });
 
 window.App = App;
@@ -277,3 +263,4 @@ window.UI = UI;
 
 </body>
 </html>
+```
