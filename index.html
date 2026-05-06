@@ -2,13 +2,20 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Admin Dashboard Pro</title>
+<title>Admin Dashboard Pro UI</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
-body{
+*{
   margin:0;
-  font-family:Arial;
-  background:#0b1220;
+  padding:0;
+  box-sizing:border-box;
+  font-family: 'Inter', sans-serif;
+}
+
+body{
+  background: #0a0f1c;
   color:white;
 }
 
@@ -18,53 +25,131 @@ body{
   display:flex;
   justify-content:center;
   align-items:center;
+  background: radial-gradient(circle at top,#111827,#0a0f1c);
 }
 
-.box{
-  background:#1e293b;
+.login-box{
+  width:340px;
   padding:30px;
-  border-radius:10px;
-  width:300px;
+  border-radius:16px;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(10px);
+  border:1px solid rgba(255,255,255,0.1);
+}
+
+.login-box h2{
+  margin-bottom:20px;
 }
 
 input, button{
   width:100%;
-  padding:10px;
+  padding:12px;
   margin-top:10px;
+  border-radius:10px;
   border:none;
-  border-radius:6px;
+  outline:none;
+}
+
+input{
+  background:#111827;
+  color:white;
 }
 
 button{
-  background:#38bdf8;
+  background: linear-gradient(135deg,#38bdf8,#6366f1);
+  color:white;
   cursor:pointer;
+  font-weight:bold;
 }
 
-/* APP */
-#app{ display:none; }
+/* APP LAYOUT */
+#app{
+  display:none;
+  height:100vh;
+}
 
-.navbar{
+/* SIDEBAR */
+.sidebar{
+  position:fixed;
+  left:0;
+  top:0;
+  width:240px;
+  height:100%;
+  background: rgba(17,24,39,0.9);
+  backdrop-filter: blur(10px);
+  padding:20px;
+  border-right:1px solid rgba(255,255,255,0.05);
+}
+
+.logo{
+  font-size:20px;
+  font-weight:700;
+  margin-bottom:30px;
+  color:#38bdf8;
+}
+
+.nav a{
+  display:block;
+  padding:12px;
+  margin:6px 0;
+  border-radius:10px;
+  color:white;
+  text-decoration:none;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.nav a:hover{
+  background:#1f2937;
+}
+
+/* MAIN */
+.main{
+  margin-left:240px;
+  padding:20px;
+}
+
+/* TOP BAR */
+.topbar{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  background:#111827;
-  padding:10px 20px;
+  margin-bottom:20px;
 }
 
-.navbar a{
-  color:white;
-  margin:0 10px;
-  cursor:pointer;
-  text-decoration:none;
+.topbar h2{
+  font-size:22px;
 }
 
-.container{ padding:20px; }
+/* CARDS */
+.grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+  gap:15px;
+}
 
 .card{
-  background:#1e293b;
-  padding:15px;
-  margin-top:10px;
-  border-radius:10px;
+  background: rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+  padding:20px;
+  border-radius:16px;
+  backdrop-filter: blur(10px);
+  transition:0.3s;
+}
+
+.card:hover{
+  transform: translateY(-5px);
+}
+
+/* HIDE SECTIONS */
+.section{ display:none; }
+
+/* ACTIVE */
+.active{ display:block; }
+
+.small{
+  color:#94a3b8;
+  margin-top:5px;
 }
 </style>
 </head>
@@ -73,8 +158,8 @@ button{
 
 <!-- LOGIN -->
 <div class="login" id="loginPage">
-  <div class="box">
-    <h2>Admin Login</h2>
+  <div class="login-box">
+    <h2>👑 Admin Login</h2>
     <input id="user" placeholder="Username">
     <input id="pass" type="password" placeholder="Password">
     <button onclick="login()">Login</button>
@@ -84,49 +169,58 @@ button{
 <!-- APP -->
 <div id="app">
 
-  <div class="navbar">
-    <div>
-      <a onclick="show('dashboard')">Dashboard</a>
-      <a onclick="show('users')">User Management</a>
-      <a onclick="show('projects')">Projects</a>
-    </div>
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="logo">⚡ AdminPro</div>
 
-    <div>
+    <div class="nav">
+      <a onclick="show('dashboard')">📊 Dashboard</a>
+      <a onclick="show('users')">👤 Users</a>
+      <a onclick="show('projects')">📁 Projects</a>
       <a onclick="show('settings')">⚙ Settings</a>
-      <a onclick="logout()">Logout</a>
+      <a onclick="logout()">🚪 Logout</a>
     </div>
   </div>
 
-  <div class="container">
+  <!-- MAIN -->
+  <div class="main">
 
     <!-- DASHBOARD -->
-    <div id="dashboard">
-      <h2>📊 Dashboard</h2>
-
-      <div class="card">
-        👤 Users: <span id="userCount">0</span>
+    <div id="dashboard" class="section active">
+      <div class="topbar">
+        <h2>Dashboard</h2>
       </div>
 
-      <div class="card">
-        📁 Projects: <span id="projectCount">0</span>
+      <div class="grid">
+        <div class="card">
+          👤 Users
+          <h2 id="userCount">0</h2>
+          <div class="small">Total registered users</div>
+        </div>
+
+        <div class="card">
+          📁 Projects
+          <h2 id="projectCount">0</h2>
+          <div class="small">Active projects</div>
+        </div>
       </div>
     </div>
 
     <!-- USERS -->
-    <div id="users" style="display:none">
-      <h2>👤 User Management</h2>
-      <div class="card" id="userList"></div>
+    <div id="users" class="section">
+      <h2>Users</h2>
+      <div id="userList"></div>
     </div>
 
     <!-- PROJECTS -->
-    <div id="projects" style="display:none">
-      <h2>📁 Projects</h2>
-      <div class="card" id="projectList"></div>
+    <div id="projects" class="section">
+      <h2>Projects</h2>
+      <div id="projectList"></div>
     </div>
 
     <!-- SETTINGS -->
-    <div id="settings" style="display:none">
-      <h2>⚙ Settings</h2>
+    <div id="settings" class="section">
+      <h2>Settings</h2>
 
       <div class="card">
         <h3>Change Password</h3>
@@ -139,43 +233,38 @@ button{
 </div>
 
 <script>
-// DEFAULT ADMIN PASSWORD
+
+/* INIT */
 if(!localStorage.getItem("adminPass")){
   localStorage.setItem("adminPass","admin123");
 }
 
-// INIT DATA
 if(!localStorage.getItem("users")){
-  localStorage.setItem("users", JSON.stringify(["user1","user2"]));
+  localStorage.setItem("users", JSON.stringify(["user1","user2","user3"]));
 }
 
 if(!localStorage.getItem("projects")){
-  localStorage.setItem("projects", JSON.stringify(["projectA","projectB"]));
+  localStorage.setItem("projects", JSON.stringify(["project A","project B"]));
 }
 
 /* LOGIN */
 function login(){
-  let u = document.getElementById("user").value;
-  let p = document.getElementById("pass").value;
+  let u=document.getElementById("user").value;
+  let p=document.getElementById("pass").value;
 
   if(u==="admin" && p===localStorage.getItem("adminPass")){
     document.getElementById("loginPage").style.display="none";
     document.getElementById("app").style.display="block";
     show("dashboard");
   } else {
-    alert("Wrong username or password");
+    alert("Wrong login");
   }
 }
 
-/* NAVIGATION */
+/* NAV */
 function show(page){
-  let pages=["dashboard","users","projects","settings"];
-
-  pages.forEach(p=>{
-    document.getElementById(p).style.display="none";
-  });
-
-  document.getElementById(page).style.display="block";
+  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+  document.getElementById(page).classList.add("active");
 
   if(page==="dashboard") updateStats();
   if(page==="users") loadUsers();
@@ -184,8 +273,8 @@ function show(page){
 
 /* STATS */
 function updateStats(){
-  let users = JSON.parse(localStorage.getItem("users")) || [];
-  let projects = JSON.parse(localStorage.getItem("projects")) || [];
+  let users = JSON.parse(localStorage.getItem("users"));
+  let projects = JSON.parse(localStorage.getItem("projects"));
 
   document.getElementById("userCount").innerText = users.length;
   document.getElementById("projectCount").innerText = projects.length;
@@ -193,22 +282,21 @@ function updateStats(){
 
 /* USERS */
 function loadUsers(){
-  let users = JSON.parse(localStorage.getItem("users")) || [];
+  let users = JSON.parse(localStorage.getItem("users"));
   document.getElementById("userList").innerHTML =
-    users.map(u => `<div class="card">${u}</div>`).join("");
+    users.map(u=>`<div class="card">👤 ${u}</div>`).join("");
 }
 
 /* PROJECTS */
 function loadProjects(){
-  let projects = JSON.parse(localStorage.getItem("projects")) || [];
+  let projects = JSON.parse(localStorage.getItem("projects"));
   document.getElementById("projectList").innerHTML =
-    projects.map(p => `<div class="card">${p}</div>`).join("");
+    projects.map(p=>`<div class="card">📁 ${p}</div>`).join("");
 }
 
-/* CHANGE PASSWORD */
+/* SETTINGS */
 function changePass(){
-  let np = document.getElementById("newPass").value;
-  localStorage.setItem("adminPass", np);
+  localStorage.setItem("adminPass", document.getElementById("newPass").value);
   alert("Password updated!");
 }
 
@@ -217,6 +305,7 @@ function logout(){
   document.getElementById("app").style.display="none";
   document.getElementById("loginPage").style.display="flex";
 }
+
 </script>
 
 </body>
