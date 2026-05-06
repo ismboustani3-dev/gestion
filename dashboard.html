@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Team System</title>
+<title>Team System Pro</title>
 
 <style>
 *{
@@ -25,12 +25,6 @@ body{
   background:#0f172a;
   padding:20px;
   position:fixed;
-}
-
-.logo{
-  font-size:20px;
-  font-weight:bold;
-  margin-bottom:25px;
 }
 
 .menu div{
@@ -93,15 +87,6 @@ button{
   margin-top:10px;
   border-radius:10px;
 }
-
-/* SECTIONS */
-.section{
-  display:none;
-}
-
-.section.active{
-  display:block;
-}
 </style>
 
 </head>
@@ -110,28 +95,25 @@ button{
 
 <!-- SIDEBAR -->
 <div class="sidebar">
+  <h2>TEAM SYSTEM</h2>
 
-<div class="logo">TEAM SYSTEM</div>
-
-<div class="menu">
-  <div class="active" onclick="show('dashboard')">📊 Dashboard</div>
-  <div onclick="show('users')">👥 Users Management</div>
-  <div onclick="show('projects')">📁 Projects</div>
-  <div onclick="logout()">🚪 Logout</div>
-</div>
-
+  <div class="menu">
+    <div onclick="UI.show('dashboard')">📊 Dashboard</div>
+    <div onclick="UI.show('users')">👥 Users</div>
+    <div onclick="UI.show('projects')">📁 Projects</div>
+    <div onclick="App.logout()">🚪 Logout</div>
+  </div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
 
 <!-- DASHBOARD -->
-<div id="dashboard" class="section active">
+<div id="dashboard" class="section">
   <h2>Dashboard</h2>
 
   <div class="box">
-    <h3>Welcome 👋</h3>
-    <p>Simple Firebase Project System</p>
+    <p>System ready ✔️</p>
   </div>
 </div>
 
@@ -141,7 +123,7 @@ button{
 
   <div class="box">
     <input id="uName" placeholder="username">
-    <button onclick="addUser()">Add User</button>
+    <button onclick="App.addUser()">Add User</button>
 
     <div id="userList"></div>
   </div>
@@ -152,15 +134,13 @@ button{
   <h2>Projects</h2>
 
   <div class="box">
-
     <input id="username" placeholder="username">
     <input id="object" placeholder="project name">
     <input id="link" placeholder="project link">
 
-    <button onclick="addProject()">Add Project</button>
+    <button onclick="App.addProject()">Add Project</button>
 
-    <div id="list"></div>
-
+    <div id="projectList"></div>
   </div>
 </div>
 
@@ -173,7 +153,9 @@ import {
   getFirestore,
   collection,
   addDoc,
-  onSnapshot
+  onSnapshot,
+  deleteDoc,
+  doc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* CONFIG */
@@ -187,71 +169,88 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* NAV */
-window.show = function(page){
-
-  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-  document.getElementById(page).classList.add("active");
-
+/* DOM CACHE */
+const DOM = {
+  userList: document.getElementById("userList"),
+  projectList: document.getElementById("projectList"),
+  uName: document.getElementById("uName"),
+  username: document.getElementById("username"),
+  object: document.getElementById("object"),
+  link: document.getElementById("link"),
 };
 
-/* LOGOUT */
-window.logout = function(){
-  location.reload();
+/* APP LOGIC */
+const App = {
+
+  /* USERS */
+  addUser: async function(){
+    if(!DOM.uName.value) return;
+
+    await addDoc(collection(db,"users"),{
+      name: DOM.uName.value
+    });
+
+    DOM.uName.value="";
+  },
+
+  /* PROJECTS */
+  addProject: async function(){
+    if(!DOM.username.value || !DOM.object.value || !DOM.link.value) return;
+
+    await addDoc(collection(db,"projects"),{
+      username: DOM.username.value,
+      object: DOM.object.value,
+      link: DOM.link.value
+    });
+
+    DOM.username.value="";
+    DOM.object.value="";
+    DOM.link.value="";
+  },
+
+  /* LOGOUT */
+  logout: function(){
+    location.reload();
+  }
 };
 
-/* USERS */
-window.addUser = async function(){
+/* UI CONTROL */
+const UI = {
+  show: function(page){
 
-  if(!uName.value) return;
+    document.querySelectorAll(".section")
+      .forEach(s=>s.style.display="none");
 
-  await addDoc(collection(db,"users"),{
-    name:uName.value
-  });
-
-  uName.value="";
+    document.getElementById(page).style.display="block";
+  }
 };
 
+/* LOAD USERS */
 function loadUsers(){
   onSnapshot(collection(db,"users"),snap=>{
-    userList.innerHTML="";
+    DOM.userList.innerHTML="";
 
     snap.forEach(d=>{
-      userList.innerHTML += `
+      DOM.userList.innerHTML += `
         <div class="card">👤 ${d.data().name}</div>
       `;
     });
   });
 }
 
-/* PROJECTS */
-window.addProject = async function(){
-
-  if(username.value=="" || object.value=="" || link.value=="") return;
-
-  await addDoc(collection(db,"projects"),{
-    username:username.value,
-    object:object.value,
-    link:link.value
-  });
-
-  username.value="";
-  object.value="";
-  link.value="";
-};
-
+/* LOAD PROJECTS */
 function loadProjects(){
   onSnapshot(collection(db,"projects"),snap=>{
-    list.innerHTML="";
+    DOM.projectList.innerHTML="";
 
     snap.forEach(d=>{
-      let data=d.data();
+      let p=d.data();
 
-      list.innerHTML+=`
+      DOM.projectList.innerHTML += `
         <div class="card">
-          👤 ${data.username}<br>
-          🧠 ${data.object}<br>
-          🔗 <a href="${data.link}" target="_blank" style="color:#38bdf8">Open</a>
+          👤 ${p.username}<br>
+          🧠 ${p.object}<br>
+          🔗 <a href="${p.link}" target="_blank" style="color:#38bdf8">Open</a>
         </div>
       `;
     });
@@ -261,6 +260,12 @@ function loadProjects(){
 /* INIT */
 loadUsers();
 loadProjects();
+
+/* expose */
+window.App = App;
+window.UI = UI;
+
+UI.show("dashboard");
 
 </script>
 
