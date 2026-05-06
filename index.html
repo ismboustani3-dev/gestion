@@ -2,20 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Pro Admin System</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<title>Admin Dashboard Fixed</title>
 
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family: Inter, sans-serif;
-}
-
 body{
-  background:#0a0f1c;
+  margin:0;
+  font-family:Arial;
+  background:#0b1220;
   color:white;
 }
 
@@ -28,21 +21,18 @@ body{
 }
 
 .box{
-  width:340px;
+  background:#1e293b;
   padding:30px;
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.1);
-  border-radius:16px;
-  backdrop-filter: blur(10px);
+  border-radius:12px;
+  width:300px;
 }
 
-input, button{
+input,button{
   width:100%;
-  padding:12px;
+  padding:10px;
   margin-top:10px;
   border:none;
-  border-radius:10px;
-  outline:none;
+  border-radius:8px;
 }
 
 input{
@@ -51,69 +41,36 @@ input{
 }
 
 button{
-  background:linear-gradient(135deg,#38bdf8,#6366f1);
-  color:white;
+  background:#38bdf8;
   cursor:pointer;
-  font-weight:600;
 }
 
 /* APP */
 #app{ display:none; }
 
-.sidebar{
-  position:fixed;
-  left:0;
-  top:0;
-  width:240px;
-  height:100%;
-  background:rgba(17,24,39,0.9);
-  padding:20px;
-  border-right:1px solid rgba(255,255,255,0.05);
-}
-
-.logo{
-  color:#38bdf8;
-  font-weight:700;
-  font-size:20px;
-  margin-bottom:20px;
-}
-
-.sidebar a{
-  display:block;
+.nav{
+  display:flex;
+  justify-content:space-between;
+  background:#111827;
   padding:10px;
-  margin:5px 0;
+}
+
+.nav a{
   color:white;
-  text-decoration:none;
+  margin:0 10px;
   cursor:pointer;
-  border-radius:8px;
 }
 
-.sidebar a:hover{
-  background:#1f2937;
-}
-
-.main{
-  margin-left:240px;
+.container{
   padding:20px;
-}
-
-.section{ display:none; }
-.active{ display:block; }
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:15px;
 }
 
 .card{
-  background:rgba(255,255,255,0.05);
+  background:#1e293b;
   padding:15px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,0.08);
+  margin-top:10px;
+  border-radius:10px;
 }
-
-h2{ margin-bottom:15px; }
 </style>
 </head>
 
@@ -132,64 +89,33 @@ h2{ margin-bottom:15px; }
 <!-- APP -->
 <div id="app">
 
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-    <div class="logo">⚡ AdminPro</div>
-
-    <a onclick="show('dashboard')">📊 Dashboard</a>
-    <a onclick="show('users')">👤 Users</a>
-    <a onclick="show('projects')">📁 Projects</a>
-    <a onclick="show('settings')">⚙ Settings</a>
-    <a onclick="logout()">🚪 Logout</a>
+  <div class="nav">
+    <div>
+      <a onclick="show('dashboard')">Dashboard</a>
+      <a onclick="show('users')">Users</a>
+      <a onclick="show('projects')">Projects</a>
+    </div>
+    <div>
+      <a onclick="logout()">Logout</a>
+    </div>
   </div>
 
-  <!-- MAIN -->
-  <div class="main">
+  <div class="container">
 
-    <!-- DASHBOARD -->
-    <div id="dashboard" class="section active">
-      <h2>Dashboard</h2>
-
-      <div class="grid">
-        <div class="card">
-          👤 Users
-          <h2 id="userCount">0</h2>
-        </div>
-
-        <div class="card">
-          📁 Projects
-          <h2 id="projectCount">0</h2>
-        </div>
-      </div>
+    <div id="dashboard">
+      <h2>📊 Dashboard</h2>
+      <div class="card">Users: <span id="userCount"></span></div>
+      <div class="card">Projects: <span id="projectCount"></span></div>
     </div>
 
-    <!-- USERS -->
-    <div id="users" class="section">
-      <h2>User Management</h2>
-
-      <div class="card">
-        <input id="newUser" placeholder="username">
-        <input id="newPass" placeholder="password">
-        <button onclick="addUser()">Create User</button>
-      </div>
-
-      <div id="userList"></div>
+    <div id="users" style="display:none">
+      <h2>Users</h2>
+      <div class="card" id="userList"></div>
     </div>
 
-    <!-- PROJECTS -->
-    <div id="projects" class="section">
+    <div id="projects" style="display:none">
       <h2>Projects</h2>
-      <div id="projectList"></div>
-    </div>
-
-    <!-- SETTINGS -->
-    <div id="settings" class="section">
-      <h2>Settings</h2>
-
-      <div class="card">
-        <input id="changePass" placeholder="new password">
-        <button onclick="updatePassword()">Update Password</button>
-      </div>
+      <div class="card" id="projectList"></div>
     </div>
 
   </div>
@@ -197,29 +123,35 @@ h2{ margin-bottom:15px; }
 
 <script>
 
-/* INIT DATA */
-if(!localStorage.getItem("users")){
-  localStorage.setItem("users", JSON.stringify([
-    {username:"admin", password:"admin123", role:"admin"},
-    {username:"user1", password:"1234", role:"user"}
-  ]));
+/* 🔥 INIT FIX (IMPORTANT FOR VERCEL) */
+function init(){
+  let users = JSON.parse(localStorage.getItem("users"));
+
+  if(!users || users.length === 0){
+    users = [
+      {username:"admin", password:"admin123", role:"admin"},
+      {username:"user1", password:"1234", role:"user"}
+    ];
+    localStorage.setItem("users", JSON.stringify(users));
+  }
+
+  let projects = JSON.parse(localStorage.getItem("projects"));
+  if(!projects || projects.length === 0){
+    projects = ["Project A","Project B"];
+    localStorage.setItem("projects", JSON.stringify(projects));
+  }
 }
 
-if(!localStorage.getItem("projects")){
-  localStorage.setItem("projects", JSON.stringify([
-    "Project A",
-    "Project B"
-  ]));
-}
+init();
 
-/* LOGIN */
+/* 🔐 LOGIN */
 function login(){
-  let u=document.getElementById("user").value;
-  let p=document.getElementById("pass").value;
+  let u = document.getElementById("user").value.trim();
+  let p = document.getElementById("pass").value.trim();
 
-  let users=JSON.parse(localStorage.getItem("users"));
+  let users = JSON.parse(localStorage.getItem("users"));
 
-  let found = users.find(x=>x.username===u && x.password===p);
+  let found = users.find(x => x.username === u && x.password === p);
 
   if(found){
     localStorage.setItem("currentUser", JSON.stringify(found));
@@ -228,6 +160,7 @@ function login(){
     document.getElementById("app").style.display="block";
 
     show("dashboard");
+    updateStats();
   } else {
     alert("Wrong credentials");
   }
@@ -235,79 +168,46 @@ function login(){
 
 /* NAV */
 function show(page){
-  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-  document.getElementById(page).classList.add("active");
+  document.getElementById("dashboard").style.display="none";
+  document.getElementById("users").style.display="none";
+  document.getElementById("projects").style.display="none";
 
-  if(page==="dashboard") updateStats();
+  document.getElementById(page).style.display="block";
+
   if(page==="users") loadUsers();
   if(page==="projects") loadProjects();
+  if(page==="dashboard") updateStats();
 }
 
 /* STATS */
 function updateStats(){
-  let users=JSON.parse(localStorage.getItem("users"));
-  let projects=JSON.parse(localStorage.getItem("projects"));
+  let users = JSON.parse(localStorage.getItem("users"));
+  let projects = JSON.parse(localStorage.getItem("projects"));
 
-  document.getElementById("userCount").innerText=users.length;
-  document.getElementById("projectCount").innerText=projects.length;
+  document.getElementById("userCount").innerText = users.length;
+  document.getElementById("projectCount").innerText = projects.length;
 }
 
 /* USERS */
-function addUser(){
-  let cu=JSON.parse(localStorage.getItem("currentUser"));
-  if(!cu || cu.role!=="admin") return alert("Admin only");
-
-  let username=document.getElementById("newUser").value;
-  let password=document.getElementById("newPass").value;
-
-  let users=JSON.parse(localStorage.getItem("users"));
-
-  users.push({username,password,role:"user"});
-
-  localStorage.setItem("users",JSON.stringify(users));
-
-  loadUsers();
-  updateStats();
-}
-
 function loadUsers(){
-  let users=JSON.parse(localStorage.getItem("users"));
+  let users = JSON.parse(localStorage.getItem("users"));
 
-  document.getElementById("userList").innerHTML=
-    users.map(u=>`
+  document.getElementById("userList").innerHTML =
+    users.map(u => `
       <div class="card">
-        👤 ${u.username} - ${u.role}
+        👤 ${u.username} (${u.role})
       </div>
     `).join("");
 }
 
 /* PROJECTS */
 function loadProjects(){
-  let projects=JSON.parse(localStorage.getItem("projects"));
+  let projects = JSON.parse(localStorage.getItem("projects"));
 
-  document.getElementById("projectList").innerHTML=
-    projects.map(p=>`
+  document.getElementById("projectList").innerHTML =
+    projects.map(p => `
       <div class="card">📁 ${p}</div>
     `).join("");
-}
-
-/* SETTINGS */
-function updatePassword(){
-  let newPass=document.getElementById("changePass").value;
-
-  let cu=JSON.parse(localStorage.getItem("currentUser"));
-
-  let users=JSON.parse(localStorage.getItem("users"));
-
-  users=users.map(u=>{
-    if(u.username===cu.username){
-      u.password=newPass;
-    }
-    return u;
-  });
-
-  localStorage.setItem("users",JSON.stringify(users));
-  alert("Password updated");
 }
 
 /* LOGOUT */
