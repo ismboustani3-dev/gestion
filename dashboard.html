@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Team System</title>
+<title>Multi User Projects</title>
 
 <style>
 *{
@@ -15,70 +15,28 @@
 body{
   background:#0b1220;
   color:white;
-  display:flex;
-}
-
-/* SIDEBAR */
-.sidebar{
-  width:240px;
-  height:100vh;
-  background:#0f172a;
   padding:20px;
-  position:fixed;
 }
 
-.logo{
-  font-size:20px;
-  font-weight:bold;
-  margin-bottom:25px;
+/* LOGIN SIMPLE */
+#login{
+  max-width:400px;
+  margin:auto;
+  margin-top:80px;
 }
 
-.menu div{
-  padding:12px;
-  margin:8px 0;
-  border-radius:10px;
-  cursor:pointer;
-  color:#9ca3af;
-}
-
-.menu div:hover{
-  background:#1f2937;
-  color:white;
-}
-
-.menu .active{
-  background:#2563eb;
-  color:white;
-}
-
-/* MAIN */
-.main{
-  margin-left:240px;
-  padding:20px;
-  width:100%;
-}
-
-/* BOX */
-.box{
-  background:#111827;
-  padding:20px;
-  border-radius:12px;
-  margin-top:15px;
-}
-
-/* INPUT */
 input{
   width:100%;
   padding:10px;
-  margin:5px 0;
+  margin:6px 0;
   border:none;
   border-radius:8px;
-  background:#0f172a;
+  background:#111827;
   color:white;
 }
 
 button{
-  padding:10px 15px;
+  padding:10px;
   background:#2563eb;
   border:none;
   border-radius:8px;
@@ -86,83 +44,48 @@ button{
   cursor:pointer;
 }
 
-/* CARD */
-.card{
-  background:#0f172a;
-  padding:12px;
-  margin-top:10px;
+/* TABLES */
+.table{
+  background:#111827;
+  padding:15px;
+  margin-top:20px;
   border-radius:10px;
 }
 
-/* SECTIONS */
-.section{
-  display:none;
+.user-title{
+  color:#38bdf8;
+  margin-bottom:10px;
 }
 
-.section.active{
-  display:block;
+.card{
+  background:#0f172a;
+  padding:10px;
+  margin-top:8px;
+  border-radius:8px;
+}
+
+a{
+  color:#38bdf8;
+  text-decoration:none;
 }
 </style>
-
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
-<div class="sidebar">
-
-<div class="logo">TEAM SYSTEM</div>
-
-<div class="menu">
-  <div class="active" onclick="show('dashboard')">📊 Dashboard</div>
-  <div onclick="show('users')">👥 Users Management</div>
-  <div onclick="show('projects')">📁 Projects</div>
-  <div onclick="logout()">🚪 Logout</div>
+<!-- LOGIN -->
+<div id="login">
+  <h2>Login</h2>
+  <input id="user" placeholder="username">
+  <button onclick="login()">Enter</button>
 </div>
 
-</div>
+<!-- APP -->
+<div id="app" style="display:none">
 
-<!-- MAIN -->
-<div class="main">
+<h2>Projects Dashboard</h2>
 
-<!-- DASHBOARD -->
-<div id="dashboard" class="section active">
-  <h2>Dashboard</h2>
-
-  <div class="box">
-    <h3>Welcome 👋</h3>
-    <p>Simple Firebase Project System</p>
-  </div>
-</div>
-
-<!-- USERS -->
-<div id="users" class="section">
-  <h2>User Management</h2>
-
-  <div class="box">
-    <input id="uName" placeholder="username">
-    <button onclick="addUser()">Add User</button>
-
-    <div id="userList"></div>
-  </div>
-</div>
-
-<!-- PROJECTS -->
-<div id="projects" class="section">
-  <h2>Projects</h2>
-
-  <div class="box">
-
-    <input id="username" placeholder="username">
-    <input id="object" placeholder="project name">
-    <input id="link" placeholder="project link">
-
-    <button onclick="addProject()">Add Project</button>
-
-    <div id="list"></div>
-
-  </div>
-</div>
+<div id="tables"></div>
 
 </div>
 
@@ -172,7 +95,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import {
   getFirestore,
   collection,
-  addDoc,
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -187,80 +109,74 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* NAV */
-window.show = function(page){
+let currentUser = "";
 
-  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-  document.getElementById(page).classList.add("active");
+/* LOGIN */
+window.login = function(){
 
+  if(user.value=="") return;
+
+  currentUser = user.value;
+
+  login.style.display="none";
+  appDiv.style.display="block";
+
+  loadProjects();
 };
 
-/* LOGOUT */
-window.logout = function(){
-  location.reload();
-};
+/* LOAD PROJECTS GROUPED BY USER */
+function loadProjects(){
 
-/* USERS */
-window.addUser = async function(){
+  onSnapshot(collection(db,"projects"),snap=>{
 
-  if(!uName.value) return;
-
-  await addDoc(collection(db,"users"),{
-    name:uName.value
-  });
-
-  uName.value="";
-};
-
-function loadUsers(){
-  onSnapshot(collection(db,"users"),snap=>{
-    userList.innerHTML="";
+    let dataByUser = {};
 
     snap.forEach(d=>{
-      userList.innerHTML += `
-        <div class="card">👤 ${d.data().name}</div>
-      `;
+      let p = d.data();
+
+      if(!dataByUser[p.username]){
+        dataByUser[p.username] = [];
+      }
+
+      dataByUser[p.username].push(p);
     });
+
+    renderTables(dataByUser);
+
   });
 }
 
-/* PROJECTS */
-window.addProject = async function(){
+/* RENDER TABLES */
+function renderTables(data){
 
-  if(username.value=="" || object.value=="" || link.value=="") return;
+  tables.innerHTML="";
 
-  await addDoc(collection(db,"projects"),{
-    username:username.value,
-    object:object.value,
-    link:link.value
-  });
+  for(let user in data){
 
-  username.value="";
-  object.value="";
-  link.value="";
-};
+    // optional: show only current user
+    if(user !== currentUser) continue;
 
-function loadProjects(){
-  onSnapshot(collection(db,"projects"),snap=>{
-    list.innerHTML="";
+    let projects = data[user];
 
-    snap.forEach(d=>{
-      let data=d.data();
+    let html = `
+      <div class="table">
+        <div class="user-title">👤 ${user}</div>
+    `;
 
-      list.innerHTML+=`
+    projects.forEach(p=>{
+      html += `
         <div class="card">
-          👤 ${data.username}<br>
-          🧠 ${data.object}<br>
-          🔗 <a href="${data.link}" target="_blank" style="color:#38bdf8">Open</a>
+          🧠 ${p.object}<br>
+          🔗 <a href="${p.link}" target="_blank">Open</a>
         </div>
       `;
     });
-  });
-}
 
-/* INIT */
-loadUsers();
-loadProjects();
+    html += `</div>`;
+
+    tables.innerHTML += html;
+  }
+}
 
 </script>
 
