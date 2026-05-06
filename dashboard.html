@@ -2,9 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TeamDash Simple</title>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<title>Projects Dashboard</title>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI}
@@ -40,6 +38,7 @@ input{
   border-radius:8px;
   border:none;
 }
+
 button{
   padding:10px;
   background:#2563eb;
@@ -49,15 +48,18 @@ button{
   cursor:pointer;
 }
 
-/* LIST */
-.item{
-  padding:10px;
-  border-bottom:1px solid #1f2937;
+/* CARD */
+.project{
+  background:#0f172a;
+  padding:12px;
+  margin-top:10px;
+  border-radius:10px;
 }
 
-/* SECTIONS */
-.section{display:none}
-.section.active{display:block}
+.project a{
+  color:#38bdf8;
+  text-decoration:none;
+}
 </style>
 </head>
 
@@ -65,50 +67,30 @@ button{
 
 <!-- SIDEBAR -->
 <div class="sidebar">
-  <h2>TeamDash</h2>
+  <h2>Projects</h2>
 
   <div class="menu">
-    <div onclick="show('dashboard')" class="active">📊 Dashboard</div>
-    <div onclick="show('users')">👥 Users</div>
-    <div onclick="show('projects')">📁 Projects</div>
+    <div class="active">📁 Projects</div>
   </div>
 </div>
 
 <div class="main">
 
-<!-- DASHBOARD -->
-<div id="dashboard" class="section active">
-  <h2>Dashboard</h2>
+<h2>Create Project</h2>
 
-  <div class="box">
-    <h3>System Overview</h3>
-    <canvas id="chart"></canvas>
-  </div>
+<div class="box">
+
+  <input id="username" placeholder="username">
+  <input id="object" placeholder="project object">
+  <input id="link" placeholder="project link (vercel url)">
+
+  <button onclick="addProject()">Add Project</button>
+
 </div>
 
-<!-- USERS -->
-<div id="users" class="section">
-  <h2>Users</h2>
+<h2>All Projects</h2>
 
-  <div class="box">
-    <input id="userName" placeholder="username">
-    <button onclick="addUser()">Add User</button>
-
-    <div id="userList"></div>
-  </div>
-</div>
-
-<!-- PROJECTS -->
-<div id="projects" class="section">
-  <h2>Projects</h2>
-
-  <div class="box">
-    <input id="projectName" placeholder="project name">
-    <button onclick="addProject()">Add Project</button>
-
-    <div id="projectList"></div>
-  </div>
-</div>
+<div id="list"></div>
 
 </div>
 
@@ -119,12 +101,12 @@ import {
   getFirestore,
   collection,
   addDoc,
+  onSnapshot,
   deleteDoc,
-  doc,
-  onSnapshot
+  doc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* CONFIG */
+/* 🔴 CONFIG */
 const firebaseConfig = {
   apiKey: "XXXX",
   authDomain: "XXXX",
@@ -135,81 +117,56 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* NAV */
-window.show = function(page){
-  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-  document.getElementById(page).classList.add("active");
-};
+/* ➕ ADD PROJECT */
+window.addProject = async function(){
 
-/* USERS */
-window.addUser = async function(){
-  if(userName.value==="") return;
+  if(username.value=="" || object.value=="" || link.value=="") return;
 
-  await addDoc(collection(db,"users"),{
-    name:userName.value
+  await addDoc(collection(db,"projects"),{
+    username: username.value,
+    object: object.value,
+    link: link.value
   });
 
-  userName.value="";
+  username.value="";
+  object.value="";
+  link.value="";
 };
 
-window.deleteUser = async function(id){
-  await deleteDoc(doc(db,"users",id));
-};
+/* 📥 LOAD PROJECTS */
+function loadProjects(){
 
-function loadUsers(){
-  onSnapshot(collection(db,"users"),snap=>{
-    userList.innerHTML="";
+  onSnapshot(collection(db,"projects"),snap=>{
+
+    list.innerHTML="";
+
     snap.forEach(d=>{
-      userList.innerHTML+=`
-        <div class="item">
-          ${d.data().name}
-          <button onclick="deleteUser('${d.id}')">X</button>
+      let data = d.data();
+
+      list.innerHTML += `
+        <div class="project">
+          <b>👤 ${data.username}</b><br>
+          🧠 ${data.object}<br><br>
+
+          🔗 
+          <a href="${data.link}" target="_blank">
+            Open Project
+          </a>
+
+          <br><br>
+          <button onclick="deleteProject('${d.id}')">Delete</button>
         </div>
       `;
     });
+
   });
 }
 
-/* PROJECTS */
-window.addProject = async function(){
-  if(projectName.value==="") return;
-
-  await addDoc(collection(db,"projects"),{
-    name:projectName.value
-  });
-
-  projectName.value="";
-};
-
+/* ❌ DELETE */
 window.deleteProject = async function(id){
   await deleteDoc(doc(db,"projects",id));
 };
 
-function loadProjects(){
-  onSnapshot(collection(db,"projects"),snap=>{
-    projectList.innerHTML="";
-    snap.forEach(d=>{
-      projectList.innerHTML+=`
-        <div class="item">
-          ${d.data().name}
-          <button onclick="deleteProject('${d.id}')">X</button>
-        </div>
-      `;
-    });
-  });
-}
-
-/* SIMPLE CHART */
-new Chart(document.getElementById("chart"),{
-  type:"bar",
-  data:{
-    labels:["Users","Projects"],
-    datasets:[{data:[0,0]}]
-  }
-});
-
-/* INIT */
-loadUsers();
 loadProjects();
 
 </script>
