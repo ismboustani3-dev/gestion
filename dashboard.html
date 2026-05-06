@@ -2,71 +2,84 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>TeamDash Pro</title>
+<title>sss</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI}
-body{background:#0b1220;color:white;display:flex}
+body{background:#0b1220;color:white}
+
+/* LOGIN */
+#login{
+  position:absolute;width:100%;height:100vh;
+  display:flex;justify-content:center;align-items:center;
+}
+.login-box{background:#111827;padding:30px;border-radius:12px;text-align:center}
+
+/* APP */
+#app{display:none}
 
 /* SIDEBAR */
-.sidebar{width:240px;height:100vh;background:#0f172a;padding:20px;position:fixed}
-.logo{font-size:22px;margin-bottom:30px}
+.sidebar{
+  width:240px;height:100vh;background:#0f172a;
+  padding:20px;position:fixed;
+}
 .menu div{padding:12px;margin:8px 0;border-radius:10px;cursor:pointer;color:#9ca3af}
 .menu div:hover{background:#1f2937;color:white}
 .menu .active{background:#2563eb;color:white}
 
-/* MAIN */
-.main{margin-left:240px;padding:20px;width:100%}
+.main{margin-left:240px;padding:20px}
 
 /* CARDS */
-.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-bottom:20px}
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}
 .card{background:#111827;padding:20px;border-radius:12px}
 
 /* BOX */
 .box{background:#111827;padding:20px;border-radius:12px;margin-top:20px}
 
 /* INPUT */
-input{padding:10px;border:none;border-radius:8px;margin:5px}
-button{padding:10px 15px;border:none;border-radius:8px;background:#2563eb;color:white;cursor:pointer}
+input{padding:10px;margin:5px;border-radius:8px;border:none}
+button{padding:10px;border:none;border-radius:8px;background:#2563eb;color:white;cursor:pointer}
 
 /* LIST */
-.item{display:flex;justify-content:space-between;padding:10px;border-bottom:1px solid #1f2937}
-
-/* SECTIONS */
-.section{display:none}
-.section.active{display:block}
+.item{padding:10px;border-bottom:1px solid #1f2937}
 </style>
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
-<div class="sidebar">
-  <div class="logo">TeamDash</div>
+<!-- LOGIN -->
+<div id="login">
+  <div class="login-box">
+    <h2>Login</h2>
+    <input id="loginUser" placeholder="Username"><br>
+    <input id="loginPass" type="password" placeholder="Password"><br>
+    <button onclick="login()">Login</button>
+  </div>
+</div>
 
+<!-- APP -->
+<div id="app">
+
+<div class="sidebar">
   <div class="menu">
-    <div onclick="showPage('dashboard')" class="active">📊 Dashboard</div>
+    <div onclick="showPage('dashboard')">📊 Dashboard</div>
     <div onclick="showPage('users')">👥 Users</div>
     <div onclick="showPage('projects')">📁 Projects</div>
+    <div onclick="logout()">🚪 Logout</div>
   </div>
 </div>
 
 <div class="main">
 
 <!-- DASHBOARD -->
-<div id="dashboard" class="section active">
+<div id="dashboard">
   <h2>Dashboard</h2>
 
   <div class="cards">
     <div class="card">
-      <h3>Total Users</h3>
-      <h1 id="userCount">0</h1>
-    </div>
-
-    <div class="card">
-      <h3>Total Projects</h3>
+      <h3>My Projects</h3>
       <h1 id="projectCount">0</h1>
     </div>
 
@@ -82,44 +95,35 @@ button{padding:10px 15px;border:none;border-radius:8px;background:#2563eb;color:
 </div>
 
 <!-- USERS -->
-<div id="users" class="section">
+<div id="users" style="display:none">
   <h2>User Management</h2>
 
-  <div class="box">
-    <input id="userInput" placeholder="Username">
-    <button onclick="addUser()">Add</button>
-
-    <div id="userList"></div>
-  </div>
+  <input id="userInput" placeholder="Username">
+  <input id="passInput" type="password" placeholder="Password">
+  <button onclick="addUser()">Create</button>
 </div>
 
 <!-- PROJECTS -->
-<div id="projects" class="section">
+<div id="projects" style="display:none">
   <h2>Projects</h2>
 
-  <div class="box">
-    <input id="projectInput" placeholder="Project name">
-    <button onclick="addProject()">Add</button>
+  <input id="projectInput" placeholder="Project name">
+  <button onclick="addProject()">Add</button>
 
-    <div id="projectList"></div>
-  </div>
+  <div id="projectList"></div>
 </div>
 
+</div>
 </div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-  getFirestore,
-  collection,
-  addDoc,
-  deleteDoc,
-  doc,
-  onSnapshot
+  getFirestore, collection, addDoc, getDocs, query, where, onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* 🔴 PUT YOUR CONFIG */
+/* CONFIG */
 const firebaseConfig = {
   apiKey: "XXXX",
   authDomain: "XXXX",
@@ -130,57 +134,69 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-let users = [];
-let projects = [];
+let currentUser = null;
 let chart;
 
 /* NAV */
 window.showPage = function(p){
-  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-  document.getElementById(p).classList.add("active");
+  document.getElementById("dashboard").style.display="none";
+  document.getElementById("users").style.display="none";
+  document.getElementById("projects").style.display="none";
+  document.getElementById(p).style.display="block";
 };
 
-/* USERS */
+/* LOGIN */
+window.login = async function(){
+  let u = loginUser.value;
+  let p = loginPass.value;
+
+  const q = query(collection(db,"users"),
+    where("username","==",u),
+    where("password","==",p)
+  );
+
+  const snap = await getDocs(q);
+
+  if(snap.empty){
+    alert("Wrong login ❌");
+    return;
+  }
+
+  currentUser = u;
+
+  login.style.display="none";
+  app.style.display="block";
+
+  loadProjects();
+};
+
+/* LOGOUT */
+window.logout = function(){
+  location.reload();
+};
+
+/* CREATE USER */
 window.addUser = async function(){
-  if(userInput.value === "") return;
+  if(userInput.value=="" || passInput.value=="") return;
 
   await addDoc(collection(db,"users"),{
-    name: userInput.value
+    username:userInput.value,
+    password:passInput.value
   });
+
+  alert("User created ✅");
 
   userInput.value="";
-};
-
-function loadUsers(){
-  onSnapshot(collection(db,"users"),snap=>{
-    userList.innerHTML="";
-    users=[];
-
-    snap.forEach(d=>{
-      users.push(d.data());
-
-      userList.innerHTML+=`
-        <div class="item">
-          ${d.data().name}
-          <button onclick="deleteUser('${d.id}')">X</button>
-        </div>
-      `;
-    });
-
-    updateStats();
-  });
-}
-
-window.deleteUser = async function(id){
-  await deleteDoc(doc(db,"users",id));
+  passInput.value="";
 };
 
 /* PROJECTS */
 window.addProject = async function(){
-  if(projectInput.value === "") return;
+  if(projectInput.value=="") return;
 
   await addDoc(collection(db,"projects"),{
-    name: projectInput.value
+    name:projectInput.value,
+    owner:currentUser
   });
 
   projectInput.value="";
@@ -189,47 +205,42 @@ window.addProject = async function(){
 function loadProjects(){
   onSnapshot(collection(db,"projects"),snap=>{
     projectList.innerHTML="";
-    projects=[];
+    let count=0;
 
     snap.forEach(d=>{
-      projects.push(d.data());
+      let data=d.data();
 
-      projectList.innerHTML+=`
-        <div class="item">
-          ${d.data().name}
-          <button onclick="deleteProject('${d.id}')">X</button>
-        </div>
-      `;
+      if(data.owner===currentUser){
+        count++;
+
+        projectList.innerHTML+=`
+          <div class="item">${data.name}</div>
+        `;
+      }
     });
 
-    updateStats();
+    projectCount.innerText=count;
+    updateChart(count);
   });
 }
 
-window.deleteProject = async function(id){
-  await deleteDoc(doc(db,"projects",id));
-};
+/* CHART */
+function createChart(){
+  chart = new Chart(document.getElementById("chart"),{
+    type:'bar',
+    data:{
+      labels:['My Projects'],
+      datasets:[{data:[0]}]
+    }
+  });
+}
 
-/* STATS + CHART */
-function updateStats(){
-  userCount.innerText = users.length;
-  projectCount.innerText = projects.length;
-
-  chart.data.datasets[0].data=[users.length,projects.length];
+function updateChart(count){
+  chart.data.datasets[0].data=[count];
   chart.update();
 }
 
-chart = new Chart(document.getElementById("chart"),{
-  type:'bar',
-  data:{
-    labels:['Users','Projects'],
-    datasets:[{data:[0,0]}]
-  }
-});
-
-/* INIT */
-loadUsers();
-loadProjects();
+createChart();
 
 </script>
 
