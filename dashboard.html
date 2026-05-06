@@ -2,24 +2,18 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>WMN3 TEAMS Pro</title>
+<title>TeamDash Pro</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI;}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI}
 body{background:#0b1220;color:white;display:flex}
 
 /* SIDEBAR */
-.sidebar{
-  width:240px;height:100vh;background:#0f172a;
-  padding:20px;position:fixed;
-}
-.logo{font-size:22px;font-weight:bold;margin-bottom:30px}
-.menu div{
-  padding:12px;margin:8px 0;border-radius:10px;
-  cursor:pointer;color:#9ca3af
-}
+.sidebar{width:240px;height:100vh;background:#0f172a;padding:20px;position:fixed}
+.logo{font-size:22px;margin-bottom:30px}
+.menu div{padding:12px;margin:8px 0;border-radius:10px;cursor:pointer;color:#9ca3af}
 .menu div:hover{background:#1f2937;color:white}
 .menu .active{background:#2563eb;color:white}
 
@@ -27,54 +21,57 @@ body{background:#0b1220;color:white;display:flex}
 .main{margin-left:240px;padding:20px;width:100%}
 
 /* CARDS */
-.cards{
-  display:grid;grid-template-columns:repeat(3,1fr);
-  gap:15px;margin-bottom:20px;
-}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-bottom:20px}
 .card{background:#111827;padding:20px;border-radius:12px}
-.card h3{color:#9ca3af}
 
 /* BOX */
 .box{background:#111827;padding:20px;border-radius:12px;margin-top:20px}
 
 /* INPUT */
-input{
-  padding:10px;border:none;border-radius:8px;margin-right:10px;
-}
-button{
-  padding:10px 15px;border:none;border-radius:8px;
-  background:#2563eb;color:white;cursor:pointer;
-}
+input{padding:10px;border:none;border-radius:8px;margin:5px}
+button{padding:10px 15px;border:none;border-radius:8px;background:#2563eb;color:white;cursor:pointer}
 
 /* LIST */
-.item{
-  display:flex;justify-content:space-between;
-  padding:10px;border-bottom:1px solid #1f2937;
-}
+.item{display:flex;justify-content:space-between;padding:10px;border-bottom:1px solid #1f2937}
 
 /* SECTIONS */
 .section{display:none}
 .section.active{display:block}
+
+/* LOGIN */
+#login{position:absolute;top:0;left:0;width:100%;height:100vh;display:flex;justify-content:center;align-items:center;background:#0b1220}
+.login-box{background:#111827;padding:30px;border-radius:12px;text-align:center}
 </style>
 </head>
 
 <body>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="login-box">
+    <h2>Login</h2>
+    <input id="loginEmail" placeholder="Email"><br>
+    <input id="loginPassword" type="password" placeholder="Password"><br>
+    <button onclick="login()">Login</button>
+  </div>
+</div>
 
 <!-- SIDEBAR -->
 <div class="sidebar">
   <div class="logo">TeamDash</div>
 
   <div class="menu">
-    <div class="active" onclick="showPage('dashboard')">📊 Dashboard</div>
+    <div onclick="showPage('dashboard')">📊 Dashboard</div>
     <div onclick="showPage('users')">👥 Users</div>
     <div onclick="showPage('projects')">📁 Projects</div>
+    <div onclick="logout()">🚪 Logout</div>
   </div>
 </div>
 
 <div class="main">
 
 <!-- DASHBOARD -->
-<div id="dashboard" class="section active">
+<div id="dashboard" class="section">
   <h2>Dashboard</h2>
 
   <div class="cards">
@@ -89,13 +86,12 @@ button{
     </div>
 
     <div class="card">
-      <h3>System Status</h3>
+      <h3>Status</h3>
       <h1>Online</h1>
     </div>
   </div>
 
   <div class="box">
-    <h3>Statistics</h3>
     <canvas id="chart"></canvas>
   </div>
 </div>
@@ -105,8 +101,9 @@ button{
   <h2>User Management</h2>
 
   <div class="box">
-    <input id="userInput" placeholder="Enter username">
-    <button onclick="addUser()">Add</button>
+    <input id="userInput" placeholder="Email">
+    <input id="passwordInput" placeholder="Password" type="password">
+    <button onclick="addUser()">Create</button>
 
     <div id="userList"></div>
   </div>
@@ -117,7 +114,7 @@ button{
   <h2>Projects</h2>
 
   <div class="box">
-    <input id="projectInput" placeholder="Enter project name">
+    <input id="projectInput" placeholder="Project name">
     <button onclick="addProject()">Add</button>
 
     <div id="projectList"></div>
@@ -126,108 +123,154 @@ button{
 
 </div>
 
-<script>
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+/* 🔴 PUT YOUR CONFIG HERE */
+const firebaseConfig = {
+  apiKey: "XXXX",
+  authDomain: "XXXX",
+  projectId: "XXXX",
+  appId: "XXXX"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
 let users = [];
 let projects = [];
 let chart;
 
-/* NAVIGATION */
-function showPage(page){
+/* AUTH */
+window.login = async function(){
+  let email = loginEmail.value;
+  let pass = loginPassword.value;
+
+  try{
+    await signInWithEmailAndPassword(auth,email,pass);
+  }catch(e){
+    alert("Login failed");
+  }
+};
+
+window.logout = async function(){
+  await signOut(auth);
+};
+
+onAuthStateChanged(auth,user=>{
+  if(user){
+    document.getElementById("login").style.display="none";
+    showPage("dashboard");
+  }else{
+    document.getElementById("login").style.display="flex";
+  }
+});
+
+/* NAV */
+window.showPage = function(p){
   document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-  document.getElementById(page).classList.add("active");
-}
+  document.getElementById(p).classList.add("active");
+};
 
 /* USERS */
-function addUser(){
-  let input = document.getElementById("userInput");
-  if(input.value === "") return;
+window.addUser = async function(){
+  let email = userInput.value;
+  let pass = passwordInput.value;
 
-  users.push(input.value);
-  input.value="";
-  renderUsers();
-}
+  await createUserWithEmailAndPassword(auth,email,pass);
 
-function renderUsers(){
-  let list = document.getElementById("userList");
-  list.innerHTML="";
+  await addDoc(collection(db,"users"),{email});
+};
 
-  users.forEach((u,i)=>{
-    list.innerHTML += `
-      <div class="item">
-        ${u}
-        <button onclick="deleteUser(${i})">X</button>
-      </div>
-    `;
+function loadUsers(){
+  onSnapshot(collection(db,"users"),snap=>{
+    userList.innerHTML="";
+    users=[];
+
+    snap.forEach(d=>{
+      users.push(d.data());
+      userList.innerHTML+=`
+        <div class="item">
+          ${d.data().email}
+          <button onclick="deleteUser('${d.id}')">X</button>
+        </div>
+      `;
+    });
+
+    updateStats();
   });
-
-  updateStats();
 }
 
-function deleteUser(i){
-  users.splice(i,1);
-  renderUsers();
-}
+window.deleteUser = async function(id){
+  await deleteDoc(doc(db,"users",id));
+};
 
 /* PROJECTS */
-function addProject(){
-  let input = document.getElementById("projectInput");
-  if(input.value === "") return;
-
-  projects.push(input.value);
-  input.value="";
-  renderProjects();
-}
-
-function renderProjects(){
-  let list = document.getElementById("projectList");
-  list.innerHTML="";
-
-  projects.forEach((p,i)=>{
-    list.innerHTML += `
-      <div class="item">
-        ${p}
-        <button onclick="deleteProject(${i})">X</button>
-      </div>
-    `;
+window.addProject = async function(){
+  await addDoc(collection(db,"projects"),{
+    name: projectInput.value
   });
+  projectInput.value="";
+};
 
-  updateStats();
+function loadProjects(){
+  onSnapshot(collection(db,"projects"),snap=>{
+    projectList.innerHTML="";
+    projects=[];
+
+    snap.forEach(d=>{
+      projects.push(d.data());
+      projectList.innerHTML+=`
+        <div class="item">
+          ${d.data().name}
+          <button onclick="deleteProject('${d.id}')">X</button>
+        </div>
+      `;
+    });
+
+    updateStats();
+  });
 }
 
-function deleteProject(i){
-  projects.splice(i,1);
-  renderProjects();
-}
+window.deleteProject = async function(id){
+  await deleteDoc(doc(db,"projects",id));
+};
 
-/* DASHBOARD UPDATE */
+/* STATS */
 function updateStats(){
-  document.getElementById("userCount").innerText = users.length;
-  document.getElementById("projectCount").innerText = projects.length;
+  userCount.innerText = users.length;
+  projectCount.innerText = projects.length;
 
-  updateChart();
-}
-
-/* CHART */
-function createChart(){
-  const ctx = document.getElementById("chart");
-
-  chart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: ['Users','Projects'],
-      datasets: [{
-        data: [0,0]
-      }]
-    }
-  });
-}
-
-function updateChart(){
-  chart.data.datasets[0].data = [users.length, projects.length];
+  chart.data.datasets[0].data=[users.length,projects.length];
   chart.update();
 }
 
-createChart();
+/* CHART */
+chart = new Chart(document.getElementById("chart"),{
+  type:'bar',
+  data:{
+    labels:['Users','Projects'],
+    datasets:[{data:[0,0]}]
+  }
+});
+
+/* INIT */
+loadUsers();
+loadProjects();
+
 </script>
 
 </body>
