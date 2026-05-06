@@ -2,93 +2,75 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Projects Dashboard</title>
+<title>Projects System</title>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI}
-body{background:#0b1220;color:white;display:flex}
-
-/* SIDEBAR */
-.sidebar{
-  width:240px;height:100vh;background:#0f172a;
-  padding:20px;position:fixed;
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Segoe UI;
 }
-.menu div{
-  padding:12px;margin:8px 0;border-radius:10px;
-  cursor:pointer;color:#9ca3af;
-}
-.menu div:hover{background:#1f2937;color:white}
-.menu .active{background:#2563eb;color:white}
 
-/* MAIN */
-.main{margin-left:240px;padding:20px;width:100%}
-
-/* BOX */
-.box{
-  background:#111827;
+body{
+  background:#0b1220;
+  color:white;
   padding:20px;
-  border-radius:12px;
-  margin-top:15px;
 }
 
-/* INPUT */
+/* CONTAINER */
+.container{
+  max-width:800px;
+  margin:auto;
+}
+
+/* FORM */
 input{
+  width:100%;
   padding:10px;
-  margin:5px;
-  border-radius:8px;
+  margin:6px 0;
   border:none;
+  border-radius:8px;
 }
 
 button{
-  padding:10px;
+  padding:10px 15px;
   background:#2563eb;
-  color:white;
   border:none;
   border-radius:8px;
+  color:white;
   cursor:pointer;
 }
 
-/* CARD */
-.project{
-  background:#0f172a;
-  padding:12px;
+/* PROJECT CARD */
+.card{
+  background:#111827;
+  padding:15px;
   margin-top:10px;
   border-radius:10px;
 }
 
-.project a{
+a{
   color:#38bdf8;
   text-decoration:none;
 }
 </style>
+
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
-<div class="sidebar">
-  <h2>Projects</h2>
+<div class="container">
 
-  <div class="menu">
-    <div class="active">📁 Projects</div>
-  </div>
-</div>
+<h2>➕ Add Project</h2>
 
-<div class="main">
+<input id="username" placeholder="username">
+<input id="object" placeholder="project object">
+<input id="link" placeholder="project link">
 
-<h2>Create Project</h2>
+<button onclick="addProject()">Add</button>
 
-<div class="box">
-
-  <input id="username" placeholder="username">
-  <input id="object" placeholder="project object">
-  <input id="link" placeholder="project link (vercel url)">
-
-  <button onclick="addProject()">Add Project</button>
-
-</div>
-
-<h2>All Projects</h2>
+<h2 style="margin-top:30px;">📁 Projects List</h2>
 
 <div id="list"></div>
 
@@ -106,7 +88,7 @@ import {
   doc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* 🔴 CONFIG */
+/* 🔴 YOUR CONFIG */
 const firebaseConfig = {
   apiKey: "XXXX",
   authDomain: "XXXX",
@@ -133,7 +115,7 @@ window.addProject = async function(){
   link.value="";
 };
 
-/* 📥 LOAD PROJECTS */
+/* 📥 LOAD */
 function loadProjects(){
 
   onSnapshot(collection(db,"projects"),snap=>{
@@ -144,28 +126,19 @@ function loadProjects(){
       let data = d.data();
 
       list.innerHTML += `
-        <div class="project">
-          <b>👤 ${data.username}</b><br>
+        <div class="card">
+          👤 <b>${data.username}</b><br>
           🧠 ${data.object}<br><br>
 
-          🔗 
-          <a href="${data.link}" target="_blank">
-            Open Project
+          🔗 <a href="${data.link}" target="_blank">
+            Open Link
           </a>
-
-          <br><br>
-          <button onclick="deleteProject('${d.id}')">Delete</button>
         </div>
       `;
     });
 
   });
 }
-
-/* ❌ DELETE */
-window.deleteProject = async function(id){
-  await deleteDoc(doc(db,"projects",id));
-};
 
 loadProjects();
 
