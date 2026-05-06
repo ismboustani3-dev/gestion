@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Admin Panel</title>
+<title>Admin Dashboard Pro</title>
 
 <style>
 body{
@@ -41,9 +41,7 @@ button{
 }
 
 /* APP */
-#app{
-  display:none;
-}
+#app{ display:none; }
 
 .navbar{
   display:flex;
@@ -60,9 +58,7 @@ button{
   text-decoration:none;
 }
 
-.container{
-  padding:20px;
-}
+.container{ padding:20px; }
 
 .card{
   background:#1e293b;
@@ -103,23 +99,32 @@ button{
 
   <div class="container">
 
+    <!-- DASHBOARD -->
     <div id="dashboard">
       <h2>📊 Dashboard</h2>
-      <div class="card">Welcome Admin 👑</div>
+
+      <div class="card">
+        👤 Users: <span id="userCount">0</span>
+      </div>
+
+      <div class="card">
+        📁 Projects: <span id="projectCount">0</span>
+      </div>
     </div>
 
+    <!-- USERS -->
     <div id="users" style="display:none">
       <h2>👤 User Management</h2>
-      <div class="card">User 1</div>
-      <div class="card">User 2</div>
+      <div class="card" id="userList"></div>
     </div>
 
+    <!-- PROJECTS -->
     <div id="projects" style="display:none">
       <h2>📁 Projects</h2>
-      <div class="card">Project A</div>
-      <div class="card">Project B</div>
+      <div class="card" id="projectList"></div>
     </div>
 
+    <!-- SETTINGS -->
     <div id="settings" style="display:none">
       <h2>⚙ Settings</h2>
 
@@ -128,19 +133,27 @@ button{
         <input id="newPass" placeholder="New password">
         <button onclick="changePass()">Update</button>
       </div>
-
     </div>
 
   </div>
 </div>
 
 <script>
-// default admin
+// DEFAULT ADMIN PASSWORD
 if(!localStorage.getItem("adminPass")){
   localStorage.setItem("adminPass","admin123");
 }
 
-// LOGIN
+// INIT DATA
+if(!localStorage.getItem("users")){
+  localStorage.setItem("users", JSON.stringify(["user1","user2"]));
+}
+
+if(!localStorage.getItem("projects")){
+  localStorage.setItem("projects", JSON.stringify(["projectA","projectB"]));
+}
+
+/* LOGIN */
 function login(){
   let u = document.getElementById("user").value;
   let p = document.getElementById("pass").value;
@@ -148,29 +161,58 @@ function login(){
   if(u==="admin" && p===localStorage.getItem("adminPass")){
     document.getElementById("loginPage").style.display="none";
     document.getElementById("app").style.display="block";
+    show("dashboard");
   } else {
     alert("Wrong username or password");
   }
 }
 
-// NAVIGATION
+/* NAVIGATION */
 function show(page){
   let pages=["dashboard","users","projects","settings"];
+
   pages.forEach(p=>{
     document.getElementById(p).style.display="none";
   });
 
   document.getElementById(page).style.display="block";
+
+  if(page==="dashboard") updateStats();
+  if(page==="users") loadUsers();
+  if(page==="projects") loadProjects();
 }
 
-// SETTINGS
+/* STATS */
+function updateStats(){
+  let users = JSON.parse(localStorage.getItem("users")) || [];
+  let projects = JSON.parse(localStorage.getItem("projects")) || [];
+
+  document.getElementById("userCount").innerText = users.length;
+  document.getElementById("projectCount").innerText = projects.length;
+}
+
+/* USERS */
+function loadUsers(){
+  let users = JSON.parse(localStorage.getItem("users")) || [];
+  document.getElementById("userList").innerHTML =
+    users.map(u => `<div class="card">${u}</div>`).join("");
+}
+
+/* PROJECTS */
+function loadProjects(){
+  let projects = JSON.parse(localStorage.getItem("projects")) || [];
+  document.getElementById("projectList").innerHTML =
+    projects.map(p => `<div class="card">${p}</div>`).join("");
+}
+
+/* CHANGE PASSWORD */
 function changePass(){
   let np = document.getElementById("newPass").value;
-  localStorage.setItem("adminPass",np);
+  localStorage.setItem("adminPass", np);
   alert("Password updated!");
 }
 
-// LOGOUT
+/* LOGOUT */
 function logout(){
   document.getElementById("app").style.display="none";
   document.getElementById("loginPage").style.display="flex";
