@@ -3,19 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Projects Dashboard</title>
+<title>Ultra Pro Admin Dashboard</title>
 
 <style>
 
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-}
-
 body{
-  font-family:Arial,sans-serif;
-  background:#e5e7eb;
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background: radial-gradient(circle at top,#0a0f1c,#050814);
+  color:white;
 }
 
 /* SIDEBAR */
@@ -24,96 +20,120 @@ body{
   position:fixed;
   left:0;
   top:0;
-  width:220px;
+  width:240px;
   height:100vh;
-  background:#111827;
-  color:white;
+  background: rgba(17,24,39,0.65);
+  backdrop-filter: blur(15px);
   padding:20px;
+  border-right:1px solid rgba(255,255,255,0.08);
 }
 
 .sidebar h2{
   color:#38bdf8;
-  margin-bottom:30px;
 }
 
 /* TOPBAR */
 
 .topbar{
   position:fixed;
-  left:220px;
   top:0;
+  left:240px;
   right:0;
   height:60px;
-  background:white;
-  border-bottom:1px solid #ccc;
+  background: rgba(17,24,39,0.5);
+  backdrop-filter: blur(15px);
   display:flex;
-  align-items:center;
   justify-content:space-between;
+  align-items:center;
   padding:0 20px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
 }
 
+/* SEARCH */
+
 #search{
-  width:250px;
-  padding:10px;
-  border:1px solid #ccc;
+  padding:8px;
   border-radius:8px;
+  border:none;
+  background:#111827;
+  color:white;
+  width:220px;
 }
 
 /* MAIN */
 
 .main{
-  margin-left:220px;
+  margin-left:240px;
   margin-top:60px;
   padding:20px;
 }
 
+/* STATS */
+
+.stats{
+  display:flex;
+  gap:15px;
+}
+
+.stat{
+  flex:1;
+  background: rgba(17,24,39,0.6);
+  padding:18px;
+  border-radius:15px;
+  text-align:center;
+  border:1px solid rgba(56,189,248,0.2);
+}
+
 /* ADD BOX */
 
-.addBox{
-  background:white;
-  padding:20px;
-  border-radius:10px;
-  margin-bottom:25px;
+.card{
+  background: rgba(17,24,39,0.6);
+  backdrop-filter: blur(10px);
+  padding:15px;
+  border-radius:15px;
+  border:1px solid rgba(255,255,255,0.08);
+  margin-top:20px;
 }
 
-.addBox h3{
-  margin-bottom:15px;
-}
-
-.addBox input{
+input,button{
   padding:10px;
   margin:5px;
-  border:1px solid #ccc;
-  border-radius:8px;
+  border:none;
+  border-radius:10px;
 }
 
-.addBox button{
-  padding:10px 20px;
-  border:none;
-  background:#38bdf8;
+input{
+  background:#111827;
   color:white;
-  border-radius:8px;
+}
+
+button{
+  background:linear-gradient(45deg,#38bdf8,#0ea5e9);
+  color:white;
   cursor:pointer;
 }
 
-/* LIST */
+/* USERS BOXES */
 
 #list{
   display:flex;
-  gap:20px;
   flex-wrap:wrap;
+  gap:25px;
+  margin-top:20px;
 }
 
 /* USER BOX */
 
 .userBox{
-  width:200px;
+  width:190px;
+  min-height:260px;
   background:white;
+  color:black;
   border:2px solid black;
   padding:10px;
 }
 
-/* USER */
+/* USER TITLE */
 
 .userTitle{
   font-weight:bold;
@@ -125,7 +145,7 @@ body{
 /* PROJECT */
 
 .projectItem{
-  margin-bottom:15px;
+  margin-bottom:12px;
   padding-bottom:10px;
   border-bottom:1px solid #ddd;
 }
@@ -134,20 +154,20 @@ body{
   margin-bottom:8px;
 }
 
-/* BUTTONS */
+/* ACTIONS */
 
 .actions{
   display:flex;
-  gap:5px;
   flex-wrap:wrap;
+  gap:5px;
 }
 
 .smallBtn{
   padding:5px 8px;
+  font-size:12px;
   border:none;
   border-radius:5px;
   cursor:pointer;
-  font-size:12px;
 }
 
 .openBtn{
@@ -157,6 +177,7 @@ body{
 
 .editBtn{
   background:#facc15;
+  color:black;
 }
 
 .deleteBtn{
@@ -182,9 +203,9 @@ body{
 <div class="topbar">
 
   <input
-    type="text"
     id="search"
-    placeholder="Search..."
+    placeholder="🔍 Search..."
+    oninput="render()"
   >
 
   <div>
@@ -197,11 +218,29 @@ body{
 
 <div class="main">
 
+  <!-- STATS -->
+
+  <div class="stats">
+
+    <div class="stat">
+      👤 Users
+      <br>
+      <span id="totalUsers">0</span>
+    </div>
+
+    <div class="stat">
+      📁 Projects
+      <br>
+      <span id="totalProjects">0</span>
+    </div>
+
+  </div>
+
   <!-- ADD -->
 
-  <div class="addBox">
+  <div class="card">
 
-    <h3>Add Project</h3>
+    <h3>➕ Add Project</h3>
 
     <input
       type="text"
@@ -221,7 +260,10 @@ body{
       placeholder="Project link"
     >
 
-    <button onclick="addProject()">
+    <button
+      type="button"
+      onclick="addProject()"
+    >
       Add
     </button>
 
@@ -235,9 +277,9 @@ body{
 
 <script>
 
-/* GET */
+/* STORAGE */
 
-function getProjects(){
+function getData(){
 
   let data =
     localStorage.getItem("projects");
@@ -246,17 +288,13 @@ function getProjects(){
 
     return JSON.parse(data);
 
-  }else{
-
-    return [];
-
   }
+
+  return [];
 
 }
 
-/* SAVE */
-
-function saveProjects(data){
+function saveData(data){
 
   localStorage.setItem(
     "projects",
@@ -265,22 +303,20 @@ function saveProjects(data){
 
 }
 
-/* ADD */
+/* ADD PROJECT */
 
 function addProject(){
 
   let user =
-    document.getElementById("user").value;
+    document.getElementById("user").value.trim();
 
   let name =
-    document.getElementById("name").value;
+    document.getElementById("name").value.trim();
 
   let link =
-    document.getElementById("link").value;
+    document.getElementById("link").value.trim();
 
-  if(user === "" ||
-     name === "" ||
-     link === ""){
+  if(user == "" || name == "" || link == ""){
 
     alert("Fill all fields");
 
@@ -288,50 +324,48 @@ function addProject(){
 
   }
 
-  if(!link.startsWith("http")){
+  if(link.indexOf("http") !== 0){
 
     link = "https://" + link;
 
   }
 
-  let projects = getProjects();
+  let data = getData();
 
-  let newProject = {
+  data.push({
 
-    id: Date.now(),
+    id:new Date().getTime(),
 
-    user: user,
+    user:user,
 
-    name: name,
+    name:name,
 
-    link: link
+    link:link
 
-  };
+  });
 
-  projects.push(newProject);
-
-  saveProjects(projects);
+  saveData(data);
 
   document.getElementById("user").value = "";
   document.getElementById("name").value = "";
   document.getElementById("link").value = "";
 
-  renderProjects();
+  render();
 
 }
 
 /* DELETE */
 
-function deleteProject(id){
+function delProject(id){
 
-  let projects =
-    getProjects().filter(
+  let data =
+    getData().filter(
       p => p.id !== id
     );
 
-  saveProjects(projects);
+  saveData(data);
 
-  renderProjects();
+  render();
 
 }
 
@@ -339,14 +373,14 @@ function deleteProject(id){
 
 function editProject(id){
 
-  let projects = getProjects();
+  let data = getData();
 
   let project =
-    projects.find(p => p.id === id);
+    data.find(p => p.id === id);
 
   let newName =
     prompt(
-      "Edit name",
+      "Edit project name",
       project.name
     );
 
@@ -358,68 +392,95 @@ function editProject(id){
 
   let newLink =
     prompt(
-      "Edit link",
+      "Edit project link",
       project.link
     );
 
   if(newLink){
 
+    if(newLink.indexOf("http") !== 0){
+
+      newLink = "https://" + newLink;
+
+    }
+
     project.link = newLink;
 
   }
 
-  saveProjects(projects);
+  saveData(data);
 
-  renderProjects();
+  render();
+
+}
+
+/* STATS */
+
+function updateStats(data){
+
+  let users =
+    new Set(
+      data.map(p => p.user)
+    );
+
+  document.getElementById(
+    "totalUsers"
+  ).innerText = users.size;
+
+  document.getElementById(
+    "totalProjects"
+  ).innerText = data.length;
 
 }
 
 /* RENDER */
 
-function renderProjects(){
+function render(){
 
-  let projects = getProjects();
+  let data = getData();
 
-  let search =
+  let q =
     document.getElementById("search")
     .value
     .toLowerCase();
 
   let filtered =
-    projects.filter(p =>
+    data.filter(p =>
 
-      p.user.toLowerCase().includes(search)
+      p.user.toLowerCase().includes(q)
 
       ||
 
-      p.name.toLowerCase().includes(search)
+      p.name.toLowerCase().includes(q)
 
     );
 
+  updateStats(filtered);
+
+  let box =
+    document.getElementById("list");
+
+  box.innerHTML = "";
+
   let grouped = {};
 
-  filtered.forEach(function(project){
+  filtered.forEach(function(p){
 
-    if(!grouped[project.user]){
+    if(!grouped[p.user]){
 
-      grouped[project.user] = [];
+      grouped[p.user] = [];
 
     }
 
-    grouped[project.user].push(project);
+    grouped[p.user].push(p);
 
   });
-
-  let list =
-    document.getElementById("list");
-
-  list.innerHTML = "";
 
   for(let user in grouped){
 
     let html = "";
 
-    grouped[user].forEach(function(project){
+    grouped[user].forEach(function(p){
 
       html += `
 
@@ -427,14 +488,14 @@ function renderProjects(){
 
           <div class="projectName">
 
-            ${project.name}
+            ${p.name}
 
           </div>
 
           <div class="actions">
 
             <a
-              href="${project.link}"
+              href="${p.link}"
               target="_blank"
             >
 
@@ -448,7 +509,7 @@ function renderProjects(){
 
             <button
               class="smallBtn editBtn"
-              onclick="editProject(${project.id})"
+              onclick="editProject(${p.id})"
             >
 
               Edit
@@ -457,7 +518,7 @@ function renderProjects(){
 
             <button
               class="smallBtn deleteBtn"
-              onclick="deleteProject(${project.id})"
+              onclick="delProject(${p.id})"
             >
 
               Delete
@@ -472,13 +533,13 @@ function renderProjects(){
 
     });
 
-    list.innerHTML += `
+    box.innerHTML += `
 
       <div class="userBox">
 
         <div class="userTitle">
 
-          ${user}
+          👤 ${user}
 
         </div>
 
@@ -492,18 +553,9 @@ function renderProjects(){
 
 }
 
-/* SEARCH */
-
-document
-.getElementById("search")
-.addEventListener(
-  "input",
-  renderProjects
-);
-
 /* START */
 
-renderProjects();
+render();
 
 </script>
 
