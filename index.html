@@ -1,1 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ultra Admin</title>
 
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>⚡ Ultra Admin</h2>
+
+    <button>Dashboard</button>
+    <button>Users</button>
+    <button>Projects</button>
+</div>
+
+<div class="main">
+
+    <div class="top">
+
+        <div class="card">
+            <h3>Users</h3>
+            <span id="usersCount">0</span>
+        </div>
+
+        <div class="card">
+            <h3>Projects</h3>
+            <span id="projectsCount">0</span>
+        </div>
+
+    </div>
+
+    <div class="addBox">
+
+        <h2>Add Project</h2>
+
+        <input type="text" id="username" placeholder="Username">
+        <input type="text" id="project" placeholder="Project name">
+        <input type="text" id="link" placeholder="Project link">
+
+        <button onclick="addProject()">Add</button>
+
+    </div>
+
+    <div id="projectsList"></div>
+
+</div>
+
+<script src="app.js"></script>
+
+</body>
+</html>
