@@ -45,33 +45,6 @@ body{
   border-bottom:1px solid rgba(255,255,255,0.08);
 }
 
-/* ADMIN MENU */
-#adminMenu{
-  display:none;
-  position:absolute;
-  right:0;
-  top:40px;
-  background:#111827;
-  padding:10px;
-  border-radius:10px;
-  border:1px solid rgba(255,255,255,0.1);
-}
-
-#adminMenu button{
-  width:120px;
-  margin:5px 0;
-  padding:8px;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-  color:white;
-  background:linear-gradient(45deg,#38bdf8,#0ea5e9);
-}
-
-#adminMenu button:last-child{
-  background:#ef4444;
-}
-
 /* SEARCH */
 #search{
   padding:8px;
@@ -183,6 +156,11 @@ button:hover{
   background:#38bdf8;
   color:white;
   cursor:pointer;
+  transition:0.2s;
+}
+
+.openBtn:hover{
+  transform:scale(1.1);
 }
 
 /* ACTION */
@@ -210,33 +188,20 @@ button:hover{
 
 <!-- TOPBAR -->
 <div class="topbar">
-
   <input id="search" placeholder="🔍 Search user/project..." oninput="render()">
-
-  <div style="position:relative;">
-    👤 <span id="username"></span>
-
-    <button onclick="toggleMenu()" style="margin-left:10px;">
-      ⚙️ Admin
-    </button>
-
-    <!-- ADMIN MENU -->
-    <div id="adminMenu">
-      <button onclick="settings()">Settings</button>
-      <button onclick="logout()">Logout</button>
-    </div>
-  </div>
-
+  👤 <span id="username"></span>
 </div>
 
 <!-- MAIN -->
 <div class="main">
 
+  <!-- STATS -->
   <div class="stats">
     <div class="stat">👤 Users<br><span id="totalUsers">0</span></div>
     <div class="stat">📁 Projects<br><span id="totalProjects">0</span></div>
   </div>
 
+  <!-- ADD -->
   <div class="card">
     <h3>➕ Add Project</h3>
     <input id="user" placeholder="Username">
@@ -245,13 +210,13 @@ button:hover{
     <button onclick="add()">Add</button>
   </div>
 
+  <!-- LIST -->
   <div id="list"></div>
 
 </div>
 
 <script>
 
-/* AUTH */
 if(localStorage.getItem("auth") !== "true"){
   location.href="index.html";
 }
@@ -259,36 +224,12 @@ if(localStorage.getItem("auth") !== "true"){
 document.getElementById("username").innerText =
   localStorage.getItem("user");
 
-/* DATA */
 function getData(){
   return JSON.parse(localStorage.getItem("projects")) || [];
 }
 
 function save(d){
   localStorage.setItem("projects", JSON.stringify(d));
-}
-
-/* MENU */
-function toggleMenu(){
-  let m = document.getElementById("adminMenu");
-  m.style.display = (m.style.display==="block")?"none":"block";
-}
-
-/* SETTINGS (CHANGE PASSWORD) */
-function settings(){
-  let pass = prompt("Enter new admin password:");
-  if(pass){
-    localStorage.setItem("admin_pass", pass);
-    alert("Password updated!");
-  }
-  document.getElementById("adminMenu").style.display="none";
-}
-
-/* LOGOUT */
-function logout(){
-  localStorage.removeItem("auth");
-  localStorage.removeItem("user");
-  location.href="index.html";
 }
 
 /* ADD */
@@ -326,12 +267,12 @@ function editProject(id){
   let p = d.find(x=>x.id===id);
 
   let n = prompt("Edit name", p.name);
-  let l = prompt("Edit link", p.link);
+  if(n) p.name = n;
 
-  if(n) p.name=n;
+  let l = prompt("Edit link", p.link);
   if(l){
     if(!l.startsWith("http")) l="https://"+l;
-    p.link=l;
+    p.link = l;
   }
 
   save(d);
@@ -345,7 +286,7 @@ function updateStats(d){
   document.getElementById("totalProjects").innerText = d.length;
 }
 
-/* RENDER */
+/* RENDER + SEARCH */
 function render(){
   let d = getData();
   let q = document.getElementById("search").value?.toLowerCase() || "";
@@ -372,7 +313,13 @@ function render(){
     let rows = grouped[u].map(p=>`
       <tr>
         <td>${p.name}</td>
-        <td><a href="${p.link}" target="_blank"><button class="openBtn">OPEN</button></a></td>
+
+        <td>
+          <a href="${p.link}" target="_blank">
+            <button class="openBtn">OPEN</button>
+          </a>
+        </td>
+
         <td>
           <span class="delete" onclick="delProject(${p.id})">del</span>
           <span class="edit" onclick="editProject(${p.id})">edit</span>
@@ -383,6 +330,7 @@ function render(){
     box.innerHTML += `
       <div class="card">
         <h3>👤 ${u}</h3>
+
         <table>
           <tr>
             <th>Project</th>
