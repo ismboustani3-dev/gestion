@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Ultra Projects Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Ultra Admin Dashboard</title>
 
 <style>
 
@@ -14,7 +15,7 @@
 }
 
 body{
-  font-family:'Segoe UI',sans-serif;
+  font-family:Arial,sans-serif;
   background:#e5e7eb;
 }
 
@@ -32,8 +33,8 @@ body{
 }
 
 .sidebar h2{
-  margin-bottom:30px;
   color:#38bdf8;
+  margin-bottom:30px;
 }
 
 .sidebar ul{
@@ -42,8 +43,8 @@ body{
 
 .sidebar li{
   padding:12px;
-  margin-bottom:10px;
   background:#1f2937;
+  margin-bottom:10px;
   border-radius:8px;
   cursor:pointer;
   transition:0.2s;
@@ -58,22 +59,22 @@ body{
 .topbar{
   position:fixed;
   left:220px;
-  top:0;
   right:0;
+  top:0;
   height:60px;
   background:white;
+  border-bottom:1px solid #d1d5db;
   display:flex;
   align-items:center;
   justify-content:space-between;
   padding:0 20px;
-  border-bottom:1px solid #d1d5db;
 }
 
 #search{
-  width:260px;
+  width:250px;
   padding:10px;
-  border:1px solid #cbd5e1;
   border-radius:8px;
+  border:1px solid #cbd5e1;
 }
 
 /* MAIN */
@@ -95,8 +96,8 @@ body{
 .stat{
   flex:1;
   background:white;
-  padding:20px;
   border-radius:10px;
+  padding:20px;
   border:1px solid #d1d5db;
   text-align:center;
   font-size:18px;
@@ -110,7 +111,7 @@ body{
   padding:20px;
   border-radius:10px;
   border:1px solid #d1d5db;
-  margin-bottom:25px;
+  margin-bottom:30px;
 }
 
 .addBox h3{
@@ -126,9 +127,9 @@ body{
 
 .addBox button{
   padding:10px 20px;
-  border:none;
   background:#38bdf8;
   color:white;
+  border:none;
   border-radius:8px;
   cursor:pointer;
 }
@@ -141,15 +142,15 @@ body{
 
 #list{
   display:flex;
-  gap:30px;
   flex-wrap:wrap;
+  gap:25px;
 }
 
 /* USER BOX */
 
 .userBox{
   width:190px;
-  min-height:260px;
+  min-height:250px;
   background:white;
   border:2px solid black;
   padding:10px;
@@ -167,22 +168,21 @@ body{
 /* PROJECT */
 
 .projectItem{
-  padding:8px;
-  margin-bottom:10px;
+  margin-bottom:12px;
+  padding-bottom:10px;
   border-bottom:1px solid #ddd;
 }
 
 .projectName{
-  font-size:15px;
   margin-bottom:8px;
 }
 
-/* ACTIONS */
+/* BUTTONS */
 
 .actions{
   display:flex;
-  gap:5px;
   flex-wrap:wrap;
+  gap:5px;
 }
 
 .smallBtn{
@@ -219,17 +219,12 @@ body{
 
   .topbar{
     left:0;
-    top:auto;
     position:relative;
   }
 
   .main{
     margin-left:0;
     margin-top:0;
-  }
-
-  #list{
-    justify-content:center;
   }
 
 }
@@ -243,7 +238,7 @@ body{
 
 <div class="sidebar">
 
-  <h2>⚡ Ultra Admin</h2>
+  <h2>⚡ Ultra ismail</h2>
 
   <ul>
     <li>Dashboard</li>
@@ -262,11 +257,11 @@ body{
     type="text"
     id="search"
     placeholder="Search..."
-    oninput="render()"
+    onkeyup="render()"
   >
 
   <div>
-    👤 <span id="username"></span>
+    👤 admin
   </div>
 
 </div>
@@ -293,25 +288,37 @@ body{
 
   </div>
 
-  <!-- ADD -->
+  <!-- ADD PROJECT -->
 
   <div class="addBox">
 
     <h3>Add Project</h3>
 
-    <input id="user" placeholder="Username">
+    <input
+      type="text"
+      id="user"
+      placeholder="Username"
+    >
 
-    <input id="name" placeholder="Project name">
+    <input
+      type="text"
+      id="name"
+      placeholder="Project name"
+    >
 
-    <input id="link" placeholder="Project link">
+    <input
+      type="text"
+      id="link"
+      placeholder="Project link"
+    >
 
-    <button onclick="addProject()">
+    <button id="addBtn">
       Add
     </button>
 
   </div>
 
-  <!-- USERS PROJECTS -->
+  <!-- LIST -->
 
   <div id="list"></div>
 
@@ -319,22 +326,9 @@ body{
 
 <script>
 
-/* LOGIN CHECK */
+console.log("SCRIPT WORKING");
 
-if(localStorage.getItem("auth") !== "true"){
-
-  localStorage.setItem("auth","true");
-
-  localStorage.setItem("user","admin");
-
-}
-
-/* USERNAME */
-
-document.getElementById("username").innerText =
-localStorage.getItem("user");
-
-/* GET DATA */
+/* DATA */
 
 function getData(){
 
@@ -343,8 +337,6 @@ function getData(){
   ) || [];
 
 }
-
-/* SAVE */
 
 function saveData(data){
 
@@ -357,18 +349,30 @@ function saveData(data){
 
 /* ADD PROJECT */
 
-function addProject(){
+document.getElementById("addBtn")
+.addEventListener("click", function(){
+
+  let userInput =
+    document.getElementById("user");
+
+  let nameInput =
+    document.getElementById("name");
+
+  let linkInput =
+    document.getElementById("link");
 
   let user =
-    document.getElementById("user").value.trim();
+    userInput.value.trim();
 
   let name =
-    document.getElementById("name").value.trim();
+    nameInput.value.trim();
 
   let link =
-    document.getElementById("link").value.trim();
+    linkInput.value.trim();
 
-  if(!user || !name || !link){
+  if(user === "" ||
+     name === "" ||
+     link === ""){
 
     alert("Fill all fields");
 
@@ -398,19 +402,22 @@ function addProject(){
 
   saveData(data);
 
-  document.getElementById("user").value="";
-  document.getElementById("name").value="";
-  document.getElementById("link").value="";
+  userInput.value = "";
+  nameInput.value = "";
+  linkInput.value = "";
 
   render();
 
-}
+});
 
 /* DELETE */
 
 function delProject(id){
 
-  let data = getData().filter(p=>p.id!==id);
+  let data =
+    getData().filter(
+      p => p.id !== id
+    );
 
   saveData(data);
 
@@ -424,12 +431,14 @@ function editProject(id){
 
   let data = getData();
 
-  let project = data.find(p=>p.id===id);
+  let project =
+    data.find(p => p.id === id);
 
-  let newName = prompt(
-    "Edit project name",
-    project.name
-  );
+  let newName =
+    prompt(
+      "Edit project name",
+      project.name
+    );
 
   if(newName){
 
@@ -437,10 +446,11 @@ function editProject(id){
 
   }
 
-  let newLink = prompt(
-    "Edit project link",
-    project.link
-  );
+  let newLink =
+    prompt(
+      "Edit project link",
+      project.link
+    );
 
   if(newLink){
 
@@ -464,15 +474,18 @@ function editProject(id){
 
 function updateStats(data){
 
-  let users = new Set(
-    data.map(p=>p.user)
-  );
+  let users =
+    new Set(
+      data.map(p => p.user)
+    );
 
-  document.getElementById("totalUsers").innerText =
-    users.size;
+  document.getElementById(
+    "totalUsers"
+  ).innerText = users.size;
 
-  document.getElementById("totalProjects").innerText =
-    data.length;
+  document.getElementById(
+    "totalProjects"
+  ).innerText = data.length;
 
 }
 
@@ -487,23 +500,27 @@ function render(){
     .value
     .toLowerCase();
 
-  let filtered = data.filter(p=>
+  let filtered =
+    data.filter(p =>
 
-    p.user.toLowerCase().includes(q) ||
+      p.user.toLowerCase().includes(q)
 
-    p.name.toLowerCase().includes(q)
+      ||
 
-  );
+      p.name.toLowerCase().includes(q)
+
+    );
 
   updateStats(filtered);
 
-  let box = document.getElementById("list");
+  let box =
+    document.getElementById("list");
 
   box.innerHTML = "";
 
   let grouped = {};
 
-  filtered.forEach(p=>{
+  filtered.forEach(function(p){
 
     if(!grouped[p.user]){
 
@@ -517,8 +534,11 @@ function render(){
 
   for(let user in grouped){
 
-    let projectsHTML =
-      grouped[user].map(p=>`
+    let html = "";
+
+    grouped[user].forEach(function(p){
+
+      html += `
 
         <div class="projectItem">
 
@@ -530,10 +550,13 @@ function render(){
 
           <div class="actions">
 
-            <a href="${p.link}" target="_blank">
+            <a href="${p.link}"
+               target="_blank">
 
               <button class="smallBtn openBtn">
+
                 OPEN
+
               </button>
 
             </a>
@@ -542,21 +565,27 @@ function render(){
               class="smallBtn editBtn"
               onclick="editProject(${p.id})"
             >
+
               Edit
+
             </button>
 
             <button
               class="smallBtn deleteBtn"
               onclick="delProject(${p.id})"
             >
+
               Delete
+
             </button>
 
           </div>
 
         </div>
 
-      `).join("");
+      `;
+
+    });
 
     box.innerHTML += `
 
@@ -568,7 +597,7 @@ function render(){
 
         </div>
 
-        ${projectsHTML}
+        ${html}
 
       </div>
 
@@ -578,7 +607,7 @@ function render(){
 
 }
 
-/* FIRST LOAD */
+/* START */
 
 render();
 
