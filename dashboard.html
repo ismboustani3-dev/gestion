@@ -47,11 +47,6 @@ body{
   margin-bottom:10px;
   border-radius:8px;
   cursor:pointer;
-  transition:0.2s;
-}
-
-.sidebar li:hover{
-  background:#374151;
 }
 
 /* TOPBAR */
@@ -132,10 +127,6 @@ body{
   border:none;
   border-radius:8px;
   cursor:pointer;
-}
-
-.addBox button:hover{
-  opacity:0.9;
 }
 
 /* USERS LIST */
@@ -257,6 +248,7 @@ body{
     type="text"
     id="search"
     placeholder="Search..."
+    onkeyup="render()"
   >
 
   <div>
@@ -311,7 +303,10 @@ body{
       placeholder="Project link"
     >
 
-    <button id="addBtn">
+    <button
+      type="button"
+      onclick="addProject()"
+    >
       Add
     </button>
 
@@ -355,9 +350,7 @@ function saveData(data){
 
 /* ADD PROJECT */
 
-document
-.getElementById("addBtn")
-.onclick = function(){
+function addProject(){
 
   let user =
     document.getElementById("user")
@@ -394,7 +387,7 @@ document
 
   let data = getData();
 
-  data.push({
+  let newProject = {
 
     id: Date.now(),
 
@@ -404,11 +397,13 @@ document
 
     link: link
 
-  });
+  };
+
+  data.push(newProject);
 
   saveData(data);
 
-  /* CLEAR */
+  /* CLEAR INPUTS */
 
   document.getElementById("user").value = "";
   document.getElementById("name").value = "";
@@ -418,7 +413,7 @@ document
 
   render();
 
-};
+}
 
 /* DELETE */
 
@@ -633,15 +628,6 @@ function render(){
     html;
 
 }
-
-/* SEARCH */
-
-document
-.getElementById("search")
-.addEventListener(
-  "keyup",
-  render
-);
 
 /* START */
 
