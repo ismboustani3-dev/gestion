@@ -257,7 +257,6 @@ body{
     type="text"
     id="search"
     placeholder="Search..."
-    onkeyup="render()"
   >
 
   <div>
@@ -326,17 +325,24 @@ body{
 
 <script>
 
-console.log("SCRIPT WORKING");
-
-/* DATA */
+/* GET DATA */
 
 function getData(){
 
-  return JSON.parse(
-    localStorage.getItem("projects")
-  ) || [];
+  let data =
+    localStorage.getItem("projects");
+
+  if(data){
+
+    return JSON.parse(data);
+
+  }
+
+  return [];
 
 }
+
+/* SAVE DATA */
 
 function saveData(data){
 
@@ -349,30 +355,30 @@ function saveData(data){
 
 /* ADD PROJECT */
 
-document.getElementById("addBtn")
-.addEventListener("click", function(){
-
-  let userInput =
-    document.getElementById("user");
-
-  let nameInput =
-    document.getElementById("name");
-
-  let linkInput =
-    document.getElementById("link");
+document
+.getElementById("addBtn")
+.onclick = function(){
 
   let user =
-    userInput.value.trim();
+    document.getElementById("user")
+    .value
+    .trim();
 
   let name =
-    nameInput.value.trim();
+    document.getElementById("name")
+    .value
+    .trim();
 
   let link =
-    linkInput.value.trim();
+    document.getElementById("link")
+    .value
+    .trim();
 
-  if(user === "" ||
-     name === "" ||
-     link === ""){
+  if(
+    user === "" ||
+    name === "" ||
+    link === ""
+  ){
 
     alert("Fill all fields");
 
@@ -390,34 +396,41 @@ document.getElementById("addBtn")
 
   data.push({
 
-    id:Date.now(),
+    id: Date.now(),
 
-    user:user,
+    user: user,
 
-    name:name,
+    name: name,
 
-    link:link
+    link: link
 
   });
 
   saveData(data);
 
-  userInput.value = "";
-  nameInput.value = "";
-  linkInput.value = "";
+  /* CLEAR */
+
+  document.getElementById("user").value = "";
+  document.getElementById("name").value = "";
+  document.getElementById("link").value = "";
+
+  /* REFRESH */
 
   render();
 
-});
+};
 
 /* DELETE */
 
 function delProject(id){
 
-  let data =
-    getData().filter(
-      p => p.id !== id
-    );
+  let data = getData();
+
+  data = data.filter(function(p){
+
+    return p.id !== id;
+
+  });
 
   saveData(data);
 
@@ -432,7 +445,11 @@ function editProject(id){
   let data = getData();
 
   let project =
-    data.find(p => p.id === id);
+    data.find(function(p){
+
+      return p.id === id;
+
+    });
 
   let newName =
     prompt(
@@ -476,7 +493,11 @@ function updateStats(data){
 
   let users =
     new Set(
-      data.map(p => p.user)
+      data.map(function(p){
+
+        return p.user;
+
+      })
     );
 
   document.getElementById(
@@ -495,28 +516,27 @@ function render(){
 
   let data = getData();
 
-  let q =
+  let search =
     document.getElementById("search")
     .value
     .toLowerCase();
 
   let filtered =
-    data.filter(p =>
+    data.filter(function(p){
 
-      p.user.toLowerCase().includes(q)
+      return (
 
-      ||
+        p.user.toLowerCase().includes(search)
 
-      p.name.toLowerCase().includes(q)
+        ||
 
-    );
+        p.name.toLowerCase().includes(search)
+
+      );
+
+    });
 
   updateStats(filtered);
-
-  let box =
-    document.getElementById("list");
-
-  box.innerHTML = "";
 
   let grouped = {};
 
@@ -532,9 +552,21 @@ function render(){
 
   });
 
+  let html = "";
+
   for(let user in grouped){
 
-    let html = "";
+    html += `
+
+      <div class="userBox">
+
+        <div class="userTitle">
+
+          ${user}
+
+        </div>
+
+    `;
 
     grouped[user].forEach(function(p){
 
@@ -550,8 +582,10 @@ function render(){
 
           <div class="actions">
 
-            <a href="${p.link}"
-               target="_blank">
+            <a
+              href="${p.link}"
+              target="_blank"
+            >
 
               <button class="smallBtn openBtn">
 
@@ -587,17 +621,7 @@ function render(){
 
     });
 
-    box.innerHTML += `
-
-      <div class="userBox">
-
-        <div class="userTitle">
-
-          ${user}
-
-        </div>
-
-        ${html}
+    html += `
 
       </div>
 
@@ -605,7 +629,19 @@ function render(){
 
   }
 
+  document.getElementById("list").innerHTML =
+    html;
+
 }
+
+/* SEARCH */
+
+document
+.getElementById("search")
+.addEventListener(
+  "keyup",
+  render
+);
 
 /* START */
 
